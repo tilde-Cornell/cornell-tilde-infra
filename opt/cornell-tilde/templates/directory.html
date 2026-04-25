@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <title>tilde@Cornell Directory</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="/">Home</a>
+  <a href="/directory/">Directory</a>
+  <a href="/ssh/">SSH Setup</a>
+</nav>
+
+<header>
+  <h1>tilde@Cornell Directory</h1>
+  <p class="subtitle">
+    Member profiles and personal web spaces for tilde@Cornell users.
+  </p>
+</header>
+
+<div class="card">
+  <h2>Members</h2>
+  <p>
+    tilde@Cornell currently has <strong>{member_count}</strong> {member_label}.
+    Each member has shell access and a personal page under
+    <strong>https://cornelltilde.com/~username</strong>.
+  </p>
+</div>
+
+{cards}
+
+<footer>
+  tilde@Cornell is a student-run project and is not an official Cornell University service.
+</footer>
+
+<div class="floating-join">
+  <span>Want your own page?</span>
+  <strong>ssh join@cornelltilde.com</strong>
+  <span>Password: GO BIG RED</span>
+</div>
+
+</body>
+</html>
