@@ -166,7 +166,6 @@ def create_user(app, username, ssh_key):
     index_html = public_html / "index.html"
 
     run(["adduser", "--disabled-password", "--gecos", "", username])
-    subprocess.run(["edquota", "-p", "quota-template", username], check=True)
 
     ssh_dir.mkdir(parents=True, exist_ok=True)
     auth_keys.write_text(ssh_key.strip() + "\n", encoding="utf-8")
