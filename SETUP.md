@@ -1,4 +1,3 @@
-cat > SETUP.md <<'EOF'
 # tilde@Cornell Server Setup
 
 Debian 13 server (static IP)
