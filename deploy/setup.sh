@@ -4,16 +4,16 @@ set -euo pipefail
 echo "=== tilde@Cornell New Server Install ==="
 echo
 
-read -rp "Admin username to use: " ADMIN_USER
+if [ "$EUID" -ne 0 ]; then
+  echo "run with sudo! sudo /deploy/setup.sh"
+  exit 1
+fi
+
 read -rsp "Password for join user: " JOIN_PASSWORD
 echo
 read -rp "Server domain (example: cornelltilde.com or dev.cornelltilde.com): " SERVER_DOMAIN
 echo
 
-REPO_DIR="/home/$ADMIN_USER/cornell-tilde-infra"
-
-echo "Admin user: $ADMIN_USER"
-echo "Repo path: $REPO_DIR"
 echo "Server domain: $SERVER_DOMAIN"
 echo
 
@@ -63,16 +63,6 @@ sudo mkdir -p /opt/cornell-tilde/templates
 sudo mkdir -p /opt/cornell-tilde/var
 sudo mkdir -p /opt/cornell-tilde/backups
 sudo mkdir -p /var/www/html
-
-echo
-echo "=== Deploying repo files ==="
-
-cd "$REPO_DIR"
-
-sudo rsync -av opt/cornell-tilde/bin/ /opt/cornell-tilde/bin/
-sudo rsync -av opt/cornell-tilde/lib/ /opt/cornell-tilde/lib/
-sudo rsync -av opt/cornell-tilde/templates/ /opt/cornell-tilde/templates/
-sudo rsync -av --delete site/var/www/html/ /var/www/html/
 
 echo
 echo "=== Database setup ==="
@@ -232,7 +222,7 @@ sudo ln -sf /opt/cornell-tilde/bin/tilde-admin /usr/local/sbin/tilde-admin
 echo
 echo "=== Final verification ==="
 
-sudo generate_directory.py
+sudo /usr/local/sbin/generate_directory.py
 
 sudo apache2ctl configtest
 sudo sshd -t
