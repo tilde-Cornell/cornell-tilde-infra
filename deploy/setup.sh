@@ -145,6 +145,32 @@ EOC
 sudo a2enconf servername || true
 
 echo
+
+echo "=== Apache custom configuration==="
+sudo a2enmod userdir || true
+
+sudo tee /etc/apache2/conf-available/cornell-tilde.conf > /dev/null <<'EOC'
+<IfModule mod_userdir.c>
+    UserDir public_html
+    UserDir disabled root
+</IfModule>
+
+<Directory /home/*/public_html>
+    AllowOverride None
+    Options -Indexes +FollowSymLinks
+    Require all granted
+</Directory>
+
+ErrorDocument 403 /errors/403.html
+ErrorDocument 404 /errors/404.html
+EOC
+
+sudo a2enconf cornell-tilde || true
+
+sudo apache2ctl configtest
+sudo systemctl reload apache2
+
+echo
 echo "=== Permissions ==="
 
 sudo chown -R root:root /opt/cornell-tilde
