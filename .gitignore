@@ -16,3 +16,4 @@ site/var-www-html/directory/index.html
 *.pem
 *.crt
 id_*
+.venv/
