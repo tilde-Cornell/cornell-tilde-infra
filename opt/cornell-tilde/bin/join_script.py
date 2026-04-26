@@ -42,6 +42,7 @@ def pause(message="\nPress Enter to continue."):
 def ask_email() -> str:
     while True:
         clear_screen()
+        print("=" * 60)
         print("tilde@Cornell Application")
         print("=" * 60)
         print("Step 1: Cornell Email")
@@ -68,6 +69,7 @@ def ask_email() -> str:
 def ask_name() -> str:
     while True:
         clear_screen()
+        print("=" * 60)
         print("tilde@Cornell Application")
         print("=" * 60)
         print("Step 2: Full Name")
@@ -93,6 +95,7 @@ def ask_name() -> str:
 def ask_username() -> str:
     while True:
         clear_screen()
+        print("=" * 60)
         print("tilde@Cornell Application")
         print("=" * 60)
         print("Step 3: Requested Username")
@@ -126,6 +129,7 @@ def ask_username() -> str:
 def ask_college() -> str:
     while True:
         clear_screen()
+        print("=" * 60)
         print("tilde@Cornell Application")
         print("=" * 60)
         print("Step 4: College / School")
@@ -166,6 +170,7 @@ def ask_grad_year() -> str:
 
     while True:
         clear_screen()
+        print("=" * 60)
         print("tilde@Cornell Application")
         print("=" * 60)
         print("Step 5: Graduation Year")
@@ -199,6 +204,7 @@ def ask_grad_year() -> str:
 def ask_info() -> str:
     while True:
         clear_screen()
+        print("=" * 60)
         print("tilde@Cornell Application")
         print("=" * 60)
         print("Step 6: Additional Information")
@@ -235,6 +241,7 @@ def ask_info() -> str:
 def ask_ssh_key() -> str:
     while True:
         clear_screen()
+        print("=" * 60)
         print("tilde@Cornell Application")
         print("=" * 60)
         print("Step 7: SSH Public Key")
@@ -262,6 +269,7 @@ def ask_ssh_key() -> str:
             continue
 
         clear_screen()
+        print("=" * 60)
         print("tilde@Cornell Application")
         print("=" * 60)
         print("Confirm SSH Public Key")
@@ -323,7 +331,7 @@ def show_intro():
     print("This form is used to request access to tilde@Cornell.")
     print()
     print("For help, contact the admin at:")
-    print("kl2339@cornell.edu")
+    print("admin@cornelltilde.com")
     print()
     print("By using this service, you agree to follow:")
     print("- Cornell IT policies")
@@ -403,7 +411,7 @@ def main() -> int:
     except Exception:
         leave_screen()
         print("There was an error submitting your application.")
-        print("Please contact the site admin at kl2339@cornell.edu.")
+        print("Please contact the site admin at admin@cornelltilde.com.")
         return 1
     finally:
         leave_screen()
@@ -413,7 +421,7 @@ def main() -> int:
     print(f"Application ID: {application_id}")
     print()
     print("Thanks! We will review your request and contact you by email.")
-    print("For help, contact kl2339@cornell.edu.")
+    print("For help, contact admin@cornelltilde.com.")
     print()
     return 0
 
