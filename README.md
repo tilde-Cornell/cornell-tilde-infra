@@ -9,3 +9,9 @@
 - `/var/www/html` public static website files served by Apache
 
 pls don't commit databases or user data
+
+read SETUP.md for information on how to set up
+
+pull changes from main branch with `prodgit pull origin main`
+
+check status of server to main with `prodgit status`
