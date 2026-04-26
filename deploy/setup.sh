@@ -24,7 +24,6 @@ sudo apt upgrade -y
 
 sudo apt install -y \
   sudo \
-  git \
   curl \
   tree \
   rsync \
