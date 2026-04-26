@@ -38,12 +38,13 @@ then run:
 
 ## Setup server SSH key
 ```bash
-ssh-keygen -t ed25519 -C "cornell-tilde-server" -f ~/.ssh/id_ed25519_github
+sudo mkdir -p /root/.ssh
+sudo ssh-keygen -t ed25519 -C "cornell-tilde-prod-deploy" -f /root/.ssh/id_ed25519_github
 ```
 
 ## Copy the public key
 ```bash
-cat ~/.ssh/id_ed25519_github.pub
+sudo cat /root/.ssh/id_ed25519_github.pub
 ```
 
 ## Add key to GitHub repo
@@ -58,20 +59,21 @@ Repo
 
 ## Set SSH to use the key
 ```bash
-cat > ~/.ssh/config <<'EOF-SSH'
+sudo tee /root/.ssh/config > /dev/null <<'EOF'
 Host github.com
     HostName github.com
     User git
-    IdentityFile ~/.ssh/id_ed25519_github
+    IdentityFile /root/.ssh/id_ed25519_github
     IdentitiesOnly yes
-EOF-SSH
+EOF
 
-chmod 600 ~/.ssh/config
+sudo chmod 700 /root/.ssh
+sudo chmod 600 /root/.ssh/config
 ```
 
 ## Test GitHub access! If it doesnt work, oh well
 ```bash
-ssh -T git@github.com
+sudo ssh -T git@github.com
 ```
 
 ## Install Git
@@ -79,36 +81,33 @@ ssh -T git@github.com
 sudo apt update && sudo apt install git -y
 ```
 
-
-## Clone the repo
-
-for main branch:
+## Setup Git root worktree
 ```bash
-cd ~
+sudo git --git-dir=/root/cornell-tilde-prod.git init --bare
 
-git clone git@github.com:tilde-Cornell/cornell-tilde-infra.git
+sudo git --git-dir=/root/cornell-tilde-prod.git remote add origin \
+  git@github.com:tilde-Cornell/cornell-tilde-infra.git
 
-cd cornell-tilde-infra
-```
-for development branch:
-```bash
-cd ~
+sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ fetch origin main
 
-git clone -b development git@github.com:tilde-Cornell/cornell-tilde-infra.git
+sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ checkout -f origin/main
 
-cd cornell-tilde-infra
+sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ config status.showUntrackedFiles no
 ```
 
-## Make script executable (was needed in testing)
+## Create `prodgit` alias
 ```bash
-chmod +x deploy/setup.sh
+echo "alias prodgit='sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/'" >> ~/.bashrc
+source ~/.bashrc
 ```
+
 
 ## Run installer
-
 ```bash
-sudo ./deploy/setup.sh
+sudo chmod +x /deploy/setup.sh
+sudo /deploy/setup.sh
 ```
+
 it will ask:
 ```
 Admin Username: (input your current sudo account's username)
