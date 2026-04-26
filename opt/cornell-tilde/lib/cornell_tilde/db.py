@@ -76,6 +76,39 @@ def init_db() -> None:
             ON users(username COLLATE NOCASE)
         """)
 
+        conn.execute("""
+CREATE TABLE IF NOT EXISTS applications (
+application_id TEXT PRIMARY KEY,
+submitted_at TEXT,
+email TEXT,
+name TEXT,
+preferred_username TEXT,
+final_username TEXT,
+college TEXT,
+graduation_year TEXT,
+additional_info TEXT,
+ssh_key TEXT,
+status TEXT NOT NULL DEFAULT 'pending'
+CHECK (status IN ('pending', 'approved', 'rejected')),
+updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+        """)
+
+        conn.execute("""
+CREATE INDEX IF NOT EXISTS idx_applications_status
+ON applications(status)
+        """)
+
+        conn.execute("""
+CREATE INDEX IF NOT EXISTS idx_applications_email
+ON applications(email)
+        """)
+
+        conn.execute("""
+CREATE INDEX IF NOT EXISTS idx_applications_preferred_username
+ON applications(preferred_username)
+        """)
+
 def _json_loads_or_empty(value: Optional[str]) -> dict[str, Any]:
     if not value:
         return {}
