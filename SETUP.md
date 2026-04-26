@@ -110,7 +110,6 @@ sudo /deploy/setup.sh
 
 it will ask:
 ```
-Admin Username: (input your current sudo account's username)
 Join Password: (input password you wish to publicly share)
 Domain: (ie. cornelltilde.com or dev.cornelltilde.com)
 ```
