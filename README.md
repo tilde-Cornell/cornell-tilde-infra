@@ -12,6 +12,12 @@ pls don't commit databases or user data
 
 read SETUP.md for information on how to set up
 
+create prodgit alias
+```bash
+echo "alias prodgit='sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/'" >> ~/.bashrc
+source ~/.bashrc
+```
+
 pull changes from main branch with `prodgit pull origin main`
 
 pull changes from development branch with `prodgit pull origin development`
