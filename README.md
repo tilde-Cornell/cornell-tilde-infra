@@ -14,4 +14,6 @@ read SETUP.md for information on how to set up
 
 pull changes from main branch with `prodgit pull origin main`
 
+pull changes from development branch with `prodgit pull origin development`
+
 check status of server to main with `prodgit status`
