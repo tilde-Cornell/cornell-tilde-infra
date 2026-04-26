@@ -100,8 +100,6 @@ git clone -b development git@github.com:tilde-Cornell/cornell-tilde-infra.git
 cd cornell-tilde-infra
 ```
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 ## Make script executable (was needed in testing)
 ```bash
 chmod +x deploy/setup.sh
