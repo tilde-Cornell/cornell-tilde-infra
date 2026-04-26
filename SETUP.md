@@ -91,7 +91,7 @@ sudo git --git-dir=/root/cornell-tilde-prod.git remote add origin \
 
 sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ fetch origin main
 
-sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ checkout -f origin/main
+sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ checkout -f main
 
 sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ config status.showUntrackedFiles no
 ```
@@ -104,7 +104,7 @@ sudo git --git-dir=/root/cornell-tilde-prod.git remote add origin \
 
 sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ fetch origin development
 
-sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ checkout -f origin/development
+sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ checkout -f development
 
 sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ config status.showUntrackedFiles no
 ```
