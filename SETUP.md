@@ -82,6 +82,7 @@ sudo apt update && sudo apt install git -y
 ```
 
 ## Setup Git root worktree
+for prod:
 ```bash
 sudo git --git-dir=/root/cornell-tilde-prod.git init --bare
 
@@ -91,6 +92,19 @@ sudo git --git-dir=/root/cornell-tilde-prod.git remote add origin \
 sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ fetch origin main
 
 sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ checkout -f origin/main
+
+sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ config status.showUntrackedFiles no
+```
+for dev:
+```bash
+sudo git --git-dir=/root/cornell-tilde-prod.git init --bare
+
+sudo git --git-dir=/root/cornell-tilde-prod.git remote add origin \
+  git@github.com:tilde-Cornell/cornell-tilde-infra.git
+
+sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ fetch origin development
+
+sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ checkout -f origin/development
 
 sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree=/ config status.showUntrackedFiles no
 ```
