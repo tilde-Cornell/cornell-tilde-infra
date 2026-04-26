@@ -75,6 +75,10 @@ chmod 600 ~/.ssh/config
 ssh -T git@github.com
 ```
 
+## Install Git
+```bash
+sudo apt update && sudo apt install git -y
+```
 
 
 ## Clone the repo
