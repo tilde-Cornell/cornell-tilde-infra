@@ -1,5 +1,5 @@
 #!/bin/bash
-set -u
+set -euo pipefail
 
 PROJECT_NAME="tilde@Cornell"
 PROJECT_ROOT="/opt/cornell-tilde"
