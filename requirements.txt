@@ -1,0 +1,3 @@
+-e git+https://github.com/tilde-Cornell/cornell-tilde-infra.git@cb9d5ea9212df023f36e15ab96881b61f9748681#egg=cornell_tilde&subdirectory=opt/cornell-tilde/lib
+dotenv==0.9.9
+python-dotenv==1.2.2
