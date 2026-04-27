@@ -326,6 +326,15 @@ def set_user_tilde_compute(username: str, tilde_compute: dict[str, Any]) -> None
 def set_user_public(username: str, public: bool) -> None:
     update_user_profile(username=username, public=public)
 
+def set_user_bio(username: str, new_bio: str):
+    with get_connection() as conn:
+        conn.execute("""
+            UPDATE users
+            SET bio = ?
+            WHERE username = ?
+        """, (new_bio, username))
+        conn.commit()
+
 def hide_user(username: str) -> None:
     set_user_public(username, False)
 

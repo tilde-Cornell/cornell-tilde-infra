@@ -1,0 +1,10 @@
+[project]
+name = "cornell_tilde"
+version = "0.1.0"
+description = "My reusable utilities"
+authors = []
+dependencies = []
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
