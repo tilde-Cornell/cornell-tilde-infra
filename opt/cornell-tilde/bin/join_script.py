@@ -58,7 +58,7 @@ def ask_email() -> str:
             pause()
             continue
 
-        confirm = input(f"\nIs this correct?\n{email}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{email}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return email
@@ -84,7 +84,7 @@ def ask_name() -> str:
             pause()
             continue
 
-        confirm = input(f"\nIs this correct?\n{name}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{name}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return name
@@ -118,7 +118,7 @@ def ask_username() -> str:
             pause()
             continue
 
-        confirm = input(f"\nIs this correct?\n{username}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{username}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return username
@@ -157,7 +157,7 @@ def ask_college() -> str:
 
         college = COLLEGES[index - 1]
 
-        confirm = input(f"\nIs this correct?\n{college}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{college}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return college
@@ -193,7 +193,7 @@ def ask_grad_year() -> str:
             pause()
             continue
 
-        confirm = input(f"\nIs this correct?\n{grad_year}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{grad_year}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return grad_year
@@ -218,7 +218,7 @@ def ask_info() -> str:
         if not info:
             confirm = input(
                 "\nYou did not enter any additional information.\n"
-                "Are you sure you want to leave this blank? (yes/no): "
+                "Are you sure you want to leave this blank? (yes/No): "
             ).strip().lower()
 
             if confirm in ("y", "yes"):
@@ -229,7 +229,7 @@ def ask_info() -> str:
             continue
 
         confirm = input(
-            f"\nIs this correct?\n\n{info}\n\n(yes/no): "
+            f"\nIs this correct?\n\n{info}\n\n(yes/No): "
         ).strip().lower()
 
         if confirm in ("y", "yes"):
