@@ -231,6 +231,9 @@ check_tool_links() {
     "/usr/local/sbin/submit_application.py"
     "/usr/local/sbin/tilde-admin"
     "/usr/local/sbin/rebuild_directory_when_modified.sh"
+    "/usr/local/sbin/apply-runtime"
+    "/usr/local/sbin/configure-ssh"
+    "/usr/local/sbin/post-deploy"
     "/etc/systemd/system/cornell-tilde-directory.service"
     "/etc/systemd/system/cornell-tilde-directory.path"
   )

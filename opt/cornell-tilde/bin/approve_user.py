@@ -4,6 +4,7 @@ import pwd
 import re
 import subprocess
 import sys
+import html
 from pathlib import Path
 
 sys.path.insert(0, "/opt/cornell-tilde/lib")
@@ -174,7 +175,7 @@ def create_user(app, username, ssh_key):
 
     public_html.mkdir(parents=True, exist_ok=True)
 
-    display_name = app.get("name", username)
+    display_name = html.escape(app.get("name", username), quote=True)
 
     template = TEMPLATE_FILE.read_text(encoding="utf-8")
     homepage = template.format(
