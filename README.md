@@ -21,13 +21,13 @@ source ~/.bashrc
 pull changes from main branch with:
 ```bash
 prodgit pull origin main
-sudo bash /deploy/post-deploy.sh
+sudo post-deploy
 ```
 
 pull changes from development branch with:
 ```bash
 prodgit pull origin development
-sudo bash /deploy/post-deploy.sh
+sudo post-deploy
 ```
 
 check status of server to main with `prodgit status`

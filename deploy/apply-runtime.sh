@@ -103,6 +103,9 @@ ln -sf "$PROJECT_ROOT/bin/join_script_wrapper.sh" /usr/local/sbin/join_script_wr
 ln -sf "$PROJECT_ROOT/bin/submit_application.py" /usr/local/sbin/submit_application.py
 ln -sf "$PROJECT_ROOT/bin/tilde-admin.sh" /usr/local/sbin/tilde-admin
 ln -sf "$PROJECT_ROOT/bin/rebuild_directory_when_modified.sh" /usr/local/sbin/rebuild_directory_when_modified.sh
+ln -sf /deploy/apply-runtime.sh /usr/local/sbin/apply-runtime
+ln -sf /deploy/configure-ssh.sh /usr/local/sbin/configure-ssh
+ln -sf /deploy/post-deploy.sh /usr/local/sbin/post-deploy
 ln -sf "$PROJECT_ROOT/systemd/cornell-tilde-directory.service" /etc/systemd/system/cornell-tilde-directory.service
 ln -sf "$PROJECT_ROOT/systemd/cornell-tilde-directory.path" /etc/systemd/system/cornell-tilde-directory.path
 

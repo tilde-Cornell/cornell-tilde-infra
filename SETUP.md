@@ -135,5 +135,5 @@ After pulling a new branch or commit into the root worktree, reapply runtime sta
 
 ```bash
 prodgit pull origin development
-sudo bash /deploy/post-deploy.sh
+sudo post-deploy
 ```
