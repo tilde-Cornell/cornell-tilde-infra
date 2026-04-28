@@ -129,3 +129,11 @@ Domain: (ie. cornelltilde.com or dev.cornelltilde.com)
 Admin contact email: ie. admin@cornelltilde.com
 ```
 
+## Deploy updates after setup
+
+After pulling a new branch or commit into the root worktree, reapply runtime state:
+
+```bash
+prodgit pull origin development
+sudo bash /deploy/post-deploy.sh
+```

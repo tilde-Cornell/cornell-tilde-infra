@@ -1,0 +1,135 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/common.sh"
+
+require_root
+
+section "Creating runtime directories"
+
+mkdir -p \
+  "$PROJECT_ROOT/bin" \
+  "$PROJECT_ROOT/lib" \
+  "$PROJECT_ROOT/migrations" \
+  "$PROJECT_ROOT/systemd" \
+  "$PROJECT_ROOT/templates" \
+  "$PROJECT_ROOT/var" \
+  "$WEB_ROOT"
+
+section "Database setup"
+
+groupadd -f cornelltilde-db
+touch "$DB_PATH"
+
+chown root:cornelltilde-db "$PROJECT_ROOT/var" "$DB_PATH"
+chmod 770 "$PROJECT_ROOT/var"
+chmod 660 "$DB_PATH"
+
+PYTHONPATH="$PROJECT_ROOT/lib" python3 -c "from cornell_tilde.db import init_db; init_db()"
+
+section "Permissions"
+
+chown -R root:root "$PROJECT_ROOT"
+
+chmod 755 "$PROJECT_ROOT"
+chmod 750 "$PROJECT_ROOT/bin" "$PROJECT_ROOT/lib" "$PROJECT_ROOT/migrations" "$PROJECT_ROOT/systemd" "$PROJECT_ROOT/templates"
+
+if [ -d "$PROJECT_ROOT/lib/cornell_tilde" ]; then
+  chmod 750 "$PROJECT_ROOT/lib/cornell_tilde"
+fi
+
+chmod 755 "$PROJECT_ROOT/bin/tilde-admin.sh" "$PROJECT_ROOT/bin/join_script_wrapper.sh"
+chmod 750 \
+  "$PROJECT_ROOT/bin/approve_user.py" \
+  "$PROJECT_ROOT/bin/generate_directory.py" \
+  "$PROJECT_ROOT/bin/join_script.py" \
+  "$PROJECT_ROOT/bin/submit_application.py" \
+  "$PROJECT_ROOT/bin/rebuild_directory_when_modified.sh"
+
+chmod 640 "$PROJECT_ROOT"/migrations/*.sql
+chmod 644 "$PROJECT_ROOT"/systemd/*.service "$PROJECT_ROOT"/systemd/*.path
+
+chown root:cornelltilde-db "$PROJECT_ROOT/var" "$DB_PATH"
+chmod 770 "$PROJECT_ROOT/var"
+chmod 660 "$DB_PATH"
+
+section "Join ACLs"
+
+if id join >/dev/null 2>&1; then
+  if id -nG join | tr ' ' '\n' | grep -qx cornelltilde-db; then
+    gpasswd -d join cornelltilde-db || true
+  fi
+
+  setfacl -m u:join:--x "$PROJECT_ROOT"
+
+  setfacl -m u:join:r-x "$PROJECT_ROOT/bin"
+  setfacl -m u:join:r-x "$PROJECT_ROOT/bin/join_script.py"
+  setfacl -m u:join:r-x "$PROJECT_ROOT/bin/join_script_wrapper.sh"
+  setfacl -m u:join:r-x "$PROJECT_ROOT/bin/submit_application.py"
+
+  setfacl -m u:join:r-x "$PROJECT_ROOT/lib"
+  setfacl -m u:join:r-x "$PROJECT_ROOT/lib/cornell_tilde"
+  setfacl -m u:join:r-- "$PROJECT_ROOT"/lib/cornell_tilde/*.py
+
+  setfacl -x u:join "$PROJECT_ROOT/var" 2>/dev/null || true
+  setfacl -x u:join "$DB_PATH" 2>/dev/null || true
+else
+  echo "join user does not exist yet; skipping join ACLs."
+fi
+
+section "Join sudoers"
+
+cat > /etc/sudoers.d/join_script <<'EOC'
+join ALL=(root) NOPASSWD: /opt/cornell-tilde/bin/submit_application.py
+EOC
+
+chown root:root /etc/sudoers.d/join_script
+chmod 0440 /etc/sudoers.d/join_script
+visudo -cf /etc/sudoers.d/join_script
+
+section "Site permissions"
+
+chown -R root:root "$WEB_ROOT"
+find "$WEB_ROOT" -type d -exec chmod 755 {} \;
+find "$WEB_ROOT" -type f -exec chmod 644 {} \;
+
+section "Command and systemd links"
+
+ln -sf "$PROJECT_ROOT/bin/approve_user.py" /usr/local/sbin/approve_user.py
+ln -sf "$PROJECT_ROOT/bin/generate_directory.py" /usr/local/sbin/generate_directory.py
+ln -sf "$PROJECT_ROOT/bin/join_script.py" /usr/local/sbin/join_script.py
+ln -sf "$PROJECT_ROOT/bin/join_script_wrapper.sh" /usr/local/sbin/join_script_wrapper.sh
+ln -sf "$PROJECT_ROOT/bin/submit_application.py" /usr/local/sbin/submit_application.py
+ln -sf "$PROJECT_ROOT/bin/tilde-admin.sh" /usr/local/sbin/tilde-admin
+ln -sf "$PROJECT_ROOT/bin/rebuild_directory_when_modified.sh" /usr/local/sbin/rebuild_directory_when_modified.sh
+ln -sf "$PROJECT_ROOT/systemd/cornell-tilde-directory.service" /etc/systemd/system/cornell-tilde-directory.service
+ln -sf "$PROJECT_ROOT/systemd/cornell-tilde-directory.path" /etc/systemd/system/cornell-tilde-directory.path
+
+section "Directory rebuild watcher"
+
+systemctl daemon-reload
+systemctl reset-failed cornell-tilde-directory.service || true
+systemctl enable --now cornell-tilde-directory.path
+
+sqlite3 "$DB_PATH" "
+  UPDATE directory_modified
+  SET modified = 1,
+      updated_at = CURRENT_TIMESTAMP
+  WHERE id = 1;
+"
+
+systemctl reset-failed cornell-tilde-directory.service || true
+systemctl start cornell-tilde-directory.service
+
+section "Runtime verification"
+
+apache2ctl configtest
+sshd -t
+visudo -c
+
+PYTHONPATH="$PROJECT_ROOT/lib" python3 -c "from cornell_tilde.db import get_connection; print('db import works')"
+
+sqlite3 "$DB_PATH" ".tables"
+sqlite3 "$DB_PATH" "SELECT * FROM directory_modified;"
+systemctl status cornell-tilde-directory.path --no-pager

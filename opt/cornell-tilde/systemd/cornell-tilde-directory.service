@@ -1,5 +1,6 @@
 [Unit]
 Description=Regenerate directory when user data changes
+StartLimitIntervalSec=0
 
 [Service]
 Type=oneshot

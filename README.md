@@ -18,8 +18,16 @@ echo "alias prodgit='sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree
 source ~/.bashrc
 ```
 
-pull changes from main branch with `prodgit pull origin main`
+pull changes from main branch with:
+```bash
+prodgit pull origin main
+sudo bash /deploy/post-deploy.sh
+```
 
-pull changes from development branch with `prodgit pull origin development`
+pull changes from development branch with:
+```bash
+prodgit pull origin development
+sudo bash /deploy/post-deploy.sh
+```
 
 check status of server to main with `prodgit status`

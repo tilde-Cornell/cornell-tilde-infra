@@ -6,7 +6,6 @@ __pycache__/
 *.tar.gz
 .env
 
-opt/cornell-tilde/backups/
 opt/cornell-tilde/var/*
 !opt/cornell-tilde/var/.gitkeep
 
