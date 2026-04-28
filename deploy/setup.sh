@@ -39,6 +39,8 @@ sudo apt install -y \
   python3-certbot-apache \
   unattended-upgrades
 
+sudo python3 -m pip install --break-system-packages python-dotenv
+
 echo
 echo "=== Enabling services ==="
 
@@ -59,6 +61,8 @@ echo "=== Creating directories ==="
 
 sudo mkdir -p /opt/cornell-tilde/bin
 sudo mkdir -p /opt/cornell-tilde/lib
+sudo mkdir -p /opt/cornell-tilde/migrations
+sudo mkdir -p /opt/cornell-tilde/systemd
 sudo mkdir -p /opt/cornell-tilde/templates
 sudo mkdir -p /opt/cornell-tilde/var
 sudo mkdir -p /opt/cornell-tilde/backups
@@ -76,9 +80,6 @@ sudo chmod 770 /opt/cornell-tilde/var
 
 sudo chown root:cornelltilde-db /opt/cornell-tilde/var/cornell_tilde.sqlite3
 sudo chmod 660 /opt/cornell-tilde/var/cornell_tilde.sqlite3
-
-sudo PYTHONPATH=/opt/cornell-tilde/lib \
-python3 -c "from cornell_tilde.db import init_db; init_db()"
 
 echo
 echo "=== Creating join user if missing ==="
@@ -171,10 +172,13 @@ sudo chmod 700 /opt/cornell-tilde/backups
 sudo chmod 750 /opt/cornell-tilde/bin
 sudo chmod 750 /opt/cornell-tilde/lib
 sudo chmod 750 /opt/cornell-tilde/lib/cornell_tilde
+sudo chmod 750 /opt/cornell-tilde/migrations
+sudo chmod 750 /opt/cornell-tilde/systemd
 sudo chmod 750 /opt/cornell-tilde/templates
 
-sudo chmod 755 /opt/cornell-tilde/bin/tilde-admin
+sudo chmod 755 /opt/cornell-tilde/bin/tilde-admin.sh
 sudo chmod 755 /opt/cornell-tilde/bin/join_script_wrapper.sh
+sudo chmod 750 /opt/cornell-tilde/bin/rebuild_directory_when_modified.sh
 
 sudo chmod 750 /opt/cornell-tilde/bin/approve_user.py
 sudo chmod 750 /opt/cornell-tilde/bin/generate_directory.py
@@ -182,6 +186,10 @@ sudo chmod 750 /opt/cornell-tilde/bin/join_script.py
 
 sudo chown root:cornelltilde-db /opt/cornell-tilde/var
 sudo chmod 770 /opt/cornell-tilde/var
+
+sudo chmod 640 /opt/cornell-tilde/migrations/*.sql
+sudo chmod 644 /opt/cornell-tilde/systemd/*.service
+sudo chmod 644 /opt/cornell-tilde/systemd/*.path
 
 sudo chown root:cornelltilde-db /opt/cornell-tilde/var/cornell_tilde.sqlite3
 sudo chmod 660 /opt/cornell-tilde/var/cornell_tilde.sqlite3
@@ -209,6 +217,9 @@ sudo chown -R root:root /var/www/html
 sudo find /var/www/html -type d -exec chmod 755 {} \;
 sudo find /var/www/html -type f -exec chmod 644 {} \;
 
+sudo PYTHONPATH=/opt/cornell-tilde/lib \
+python3 -c "from cornell_tilde.db import init_db; init_db()"
+
 echo "!!!!!!!!!!!!!!!!!!!!!"
 echo "=== TEMP Symlinks ==="
 echo "!!!!!!!!!!!!!!!!!!!!!"
@@ -217,7 +228,16 @@ sudo ln -sf /opt/cornell-tilde/bin/approve_user.py /usr/local/sbin/approve_user.
 sudo ln -sf /opt/cornell-tilde/bin/generate_directory.py /usr/local/sbin/generate_directory.py
 sudo ln -sf /opt/cornell-tilde/bin/join_script.py /usr/local/sbin/join_script.py
 sudo ln -sf /opt/cornell-tilde/bin/join_script_wrapper.sh /usr/local/sbin/join_script_wrapper.sh
-sudo ln -sf /opt/cornell-tilde/bin/tilde-admin /usr/local/sbin/tilde-admin
+sudo ln -sf /opt/cornell-tilde/bin/tilde-admin.sh /usr/local/sbin/tilde-admin
+sudo ln -sf /opt/cornell-tilde/bin/rebuild_directory_when_modified.sh /usr/local/sbin/rebuild_directory_when_modified.sh
+sudo ln -sf /opt/cornell-tilde/systemd/cornell-tilde-directory.service /etc/systemd/system/cornell-tilde-directory.service
+sudo ln -sf /opt/cornell-tilde/systemd/cornell-tilde-directory.path /etc/systemd/system/cornell-tilde-directory.path
+
+echo
+echo "=== Directory rebuild watcher ==="
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now cornell-tilde-directory.path
 
 echo
 echo "=== Final verification ==="
@@ -232,6 +252,11 @@ sudo PYTHONPATH=/opt/cornell-tilde/lib \
 python3 -c "from cornell_tilde.db import get_connection; print('db import works')"
 
 sudo sqlite3 /opt/cornell-tilde/var/cornell_tilde.sqlite3 ".tables"
+
+sudo sqlite3 /opt/cornell-tilde/var/cornell_tilde.sqlite3 \
+"SELECT * FROM directory_modified;"
+
+sudo systemctl status cornell-tilde-directory.path --no-pager
 
 echo
 echo "=== SSH configuration ==="

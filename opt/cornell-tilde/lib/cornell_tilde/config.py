@@ -3,7 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv(".env")
-BASE_DIR = Path(os.getenv("BASE_DIR")) or Path("/opt/cornell-tilde")
+BASE_DIR = Path(os.getenv("BASE_DIR", "/opt/cornell-tilde"))
 
 BIN_DIR = BASE_DIR / "bin"
 LIB_DIR = BASE_DIR / "lib"

@@ -14,9 +14,10 @@ from cornell_tilde.config import (
 )
 from cornell_tilde.db import (
     add_user_to_directory,
+    delete_user,
     get_all_users,
     get_pending_applications,
-    update_application_status,
+    set_application_status,
 )
 
 TEMPLATE_FILE = USER_HOMEPAGE_TEMPLATE
@@ -189,6 +190,15 @@ def create_user(app, username, ssh_key):
     run(["chmod", "755", str(public_html)])
     run(["chmod", "644", str(index_html)])
 
+def rollback_user_creation(username):
+    try:
+        delete_user(username)
+    except Exception:
+        pass
+
+    if user_exists(username):
+        run(["deluser", "--remove-home", username])
+
 def update_directory(app, username):
     username = username.strip().lower()
     email = app.get("email", "").strip().lower()
@@ -225,7 +235,7 @@ def regenerate_directory():
     run([str(GENERATE_DIRECTORY)])
 
 def mark_handled(app, decision, final_username=None):
-    update_application_status(
+    set_application_status(
         application_id=app.get("application_id"),
         status=decision,
         final_username=final_username,
@@ -376,21 +386,37 @@ def main():
                         input("\nApproval canceled. Press Enter to return to review.")
                         continue
 
+                    created_user = False
                     try:
                         create_user(app, username, app.get("ssh_key", ""))
+                        created_user = True
                         update_directory(app, username)
                         regenerate_directory()
                         mark_handled(app, "approved", username)
                     except subprocess.CalledProcessError as e:
+                        if created_user:
+                            try:
+                                rollback_user_creation(username)
+                            except subprocess.CalledProcessError:
+                                pass
                         clear_screen()
                         print(f"Command failed: {e}")
                         print("Application was NOT marked handled.")
+                        if created_user:
+                            print("Partial user creation was rolled back.")
                         input("\nPress Enter to continue.")
                         continue
                     except Exception as e:
+                        if created_user:
+                            try:
+                                rollback_user_creation(username)
+                            except subprocess.CalledProcessError:
+                                pass
                         clear_screen()
                         print(f"Error: {e}")
                         print("Application was NOT marked handled.")
+                        if created_user:
+                            print("Partial user creation was rolled back.")
                         input("\nPress Enter to continue.")
                         continue
 

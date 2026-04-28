@@ -1,8 +1,11 @@
 import json
 import sqlite3
+from pathlib import Path
 from typing import Any, Optional
 
-from cornell_tilde.config import DATABASE_PATH
+from cornell_tilde.config import BASE_DIR, DATABASE_PATH
+
+MIGRATIONS_DIR = BASE_DIR / "migrations"
 
 DEFAULT_JSON = "{}"
 
@@ -14,23 +17,12 @@ def get_connection() -> sqlite3.Connection:
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
+def run_sql_file(conn: sqlite3.Connection, path: Path) -> None:
+    conn.executescript(path.read_text())
+
 def init_db() -> None:
     with get_connection() as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                username TEXT PRIMARY KEY,
-                name TEXT NOT NULL,
-                email TEXT,
-                college TEXT,
-                grad_year TEXT,
-                bio TEXT,
-                public INTEGER NOT NULL DEFAULT 1,
-                permissions_json TEXT NOT NULL DEFAULT '{}',
-                tilde_compute_json TEXT NOT NULL DEFAULT '{}',
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
+        run_sql_file(conn, MIGRATIONS_DIR / "1_user-applications_initial-schema.sql")
 
         columns = {
             row["name"]
@@ -55,60 +47,18 @@ def init_db() -> None:
             columns.add("tilde_compute_json")
 
         conn.execute("""
-            UPDATE users
-            SET permissions_json = '{}'
-            WHERE permissions_json IS NULL OR permissions_json = ''
+UPDATE users
+SET permissions_json = '{}'
+WHERE permissions_json IS NULL OR permissions_json = ''
         """)
 
         conn.execute("""
-            UPDATE users
-            SET tilde_compute_json = '{}'
-            WHERE tilde_compute_json IS NULL OR tilde_compute_json = ''
+UPDATE users
+SET tilde_compute_json = '{}'
+WHERE tilde_compute_json IS NULL OR tilde_compute_json = ''
         """)
 
-        conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_users_public
-            ON users(public)
-        """)
-
-        conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_users_username_nocase
-            ON users(username COLLATE NOCASE)
-        """)
-
-        conn.execute("""
-CREATE TABLE IF NOT EXISTS applications (
-application_id TEXT PRIMARY KEY,
-submitted_at TEXT,
-email TEXT,
-name TEXT,
-preferred_username TEXT,
-final_username TEXT,
-college TEXT,
-graduation_year TEXT,
-additional_info TEXT,
-ssh_key TEXT,
-status TEXT NOT NULL DEFAULT 'pending'
-CHECK (status IN ('pending', 'approved', 'rejected')),
-updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-)
-        """)
-
-        conn.execute("""
-CREATE INDEX IF NOT EXISTS idx_applications_status
-ON applications(status)
-        """)
-
-        conn.execute("""
-CREATE INDEX IF NOT EXISTS idx_applications_email
-ON applications(email)
-        """)
-
-        conn.execute("""
-CREATE INDEX IF NOT EXISTS idx_applications_preferred_username
-ON applications(preferred_username)
-        """)
-
+        run_sql_file(conn, MIGRATIONS_DIR / "2_directory_modified_hooks.sql")
 def _json_loads_or_empty(value: Optional[str]) -> dict[str, Any]:
     if not value:
         return {}
@@ -371,7 +321,7 @@ def get_pending_applications() -> list[dict]:
 
     return [dict(row) for row in rows]
 
-def update_application_status(
+def set_application_status(
     application_id: str,
     status: str,
     final_username: Optional[str] = None,

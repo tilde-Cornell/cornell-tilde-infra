@@ -1,0 +1,6 @@
+[Unit]
+Description=Regenerate directory when user data changes
+
+[Service]
+Type=oneshot
+ExecStart=/opt/cornell-tilde/bin/rebuild_directory_when_modified.sh
