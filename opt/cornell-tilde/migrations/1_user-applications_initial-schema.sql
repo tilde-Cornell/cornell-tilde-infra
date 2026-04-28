@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
     grad_year TEXT,
     bio TEXT,
     public INTEGER NOT NULL DEFAULT 1,
+    is_admin INTEGER NOT NULL DEFAULT 0,
     permissions_json TEXT NOT NULL DEFAULT '{}',
     tilde_compute_json TEXT NOT NULL DEFAULT '{}',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

@@ -108,7 +108,7 @@ def ask_username() -> str:
         print(f"  ssh yourusername@{SITE_DOMAIN}")
         print(f"  {SITE_URL}/~yourusername")
         print()
-        print("Rules: 2-32 characters, lowercase letters, numbers, or _")
+        print("Rules: 2-32 characters, lowercase letters, numbers, -, or _")
         print("Must start with a lowercase letter.")
         print()
 

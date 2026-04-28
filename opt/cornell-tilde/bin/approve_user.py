@@ -23,7 +23,7 @@ from cornell_tilde.db import (
 
 TEMPLATE_FILE = USER_HOMEPAGE_TEMPLATE
 
-USERNAME_RE = re.compile(r"^[a-z][a-z0-9_]{1,31}$")
+USERNAME_RE = re.compile(r"^[a-z][a-z0-9_-]{1,31}$")
 
 def run(cmd):
     subprocess.run(cmd, check=True)

@@ -46,6 +46,10 @@ def init_db() -> None:
             conn.execute("ALTER TABLE users ADD COLUMN tilde_compute_json TEXT NOT NULL DEFAULT '{}'")
             columns.add("tilde_compute_json")
 
+        if "is_admin" not in columns:
+            conn.execute("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0")
+            columns.add("is_admin")
+
         conn.execute("""
 UPDATE users
 SET permissions_json = '{}'
@@ -90,6 +94,7 @@ def get_user(username: str) -> Optional[dict]:
                 grad_year,
                 bio,
                 public,
+                is_admin,
                 permissions_json,
                 tilde_compute_json,
                 created_at,
@@ -112,7 +117,8 @@ def get_public_users() -> list[dict]:
                 email,
                 college,
                 grad_year,
-                bio
+                bio,
+                is_admin
             FROM users
             WHERE public = 1
             ORDER BY username COLLATE NOCASE
@@ -131,11 +137,35 @@ def get_all_users() -> list[dict]:
                 grad_year,
                 bio,
                 public,
+                is_admin,
                 permissions_json,
                 tilde_compute_json,
                 created_at,
                 updated_at
             FROM users
+            ORDER BY username COLLATE NOCASE
+        """).fetchall()
+
+    return [dict(row) for row in rows]
+
+def get_admin_users() -> list[dict]:
+    with get_connection() as conn:
+        rows = conn.execute("""
+            SELECT
+                username,
+                name,
+                email,
+                college,
+                grad_year,
+                bio,
+                public,
+                is_admin,
+                permissions_json,
+                tilde_compute_json,
+                created_at,
+                updated_at
+            FROM users
+            WHERE is_admin = 1
             ORDER BY username COLLATE NOCASE
         """).fetchall()
 
@@ -149,6 +179,7 @@ def add_user_to_directory(
     grad_year: Optional[str] = None,
     bio: Optional[str] = None,
     public: bool = True,
+    is_admin: bool = False,
     permissions: Optional[dict[str, Any]] = None,
     tilde_compute: Optional[dict[str, Any]] = None,
 ) -> None:
@@ -165,10 +196,11 @@ def add_user_to_directory(
                 grad_year,
                 bio,
                 public,
+                is_admin,
                 permissions_json,
                 tilde_compute_json
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(username) DO UPDATE SET
                 name = excluded.name,
                 email = excluded.email,
@@ -176,6 +208,7 @@ def add_user_to_directory(
                 grad_year = excluded.grad_year,
                 bio = excluded.bio,
                 public = excluded.public,
+                is_admin = users.is_admin,
                 permissions_json = COALESCE(users.permissions_json, '{}'),
                 tilde_compute_json = COALESCE(users.tilde_compute_json, '{}'),
                 updated_at = CURRENT_TIMESTAMP
@@ -187,6 +220,7 @@ def add_user_to_directory(
             grad_year,
             bio or "",
             1 if public else 0,
+            1 if is_admin else 0,
             permissions_json,
             tilde_compute_json,
         ))
@@ -199,6 +233,7 @@ def update_user_profile(
     grad_year: Optional[str] = None,
     bio: Optional[str] = None,
     public: Optional[bool] = None,
+    is_admin: Optional[bool] = None,
 ) -> None:
     fields = []
     values = []
@@ -226,6 +261,10 @@ def update_user_profile(
     if public is not None:
         fields.append("public = ?")
         values.append(1 if public else 0)
+
+    if is_admin is not None:
+        fields.append("is_admin = ?")
+        values.append(1 if is_admin else 0)
 
     if not fields:
         return
@@ -275,6 +314,23 @@ def set_user_tilde_compute(username: str, tilde_compute: dict[str, Any]) -> None
 
 def set_user_public(username: str, public: bool) -> None:
     update_user_profile(username=username, public=public)
+
+def get_user_admin(username: str) -> bool:
+    user = get_user(username)
+
+    if user is None:
+        return False
+
+    return bool(user.get("is_admin"))
+
+def set_user_admin(username: str, is_admin: bool) -> None:
+    update_user_profile(username=username, is_admin=is_admin)
+
+def promote_user_to_admin(username: str) -> None:
+    set_user_admin(username, True)
+
+def demote_user_from_admin(username: str) -> None:
+    set_user_admin(username, False)
 
 def set_user_bio(username: str, new_bio: str):
     with get_connection() as conn:
