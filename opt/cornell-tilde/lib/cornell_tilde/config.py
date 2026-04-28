@@ -12,6 +12,7 @@ VAR_DIR = BASE_DIR / "var"
 TEMPLATE_DIR = BASE_DIR / "templates"
 SITE_DOMAIN = os.getenv("SITE_DOMAIN", "cornelltilde.com")
 SITE_URL = f"https://{SITE_DOMAIN}"
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "admin@cornelltilde.com")
 
 DATABASE_PATH = VAR_DIR / "cornell_tilde.sqlite3"
 

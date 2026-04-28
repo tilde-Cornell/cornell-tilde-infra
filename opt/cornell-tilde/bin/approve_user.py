@@ -193,13 +193,26 @@ def create_user(app, username, ssh_key):
     run(["chmod", "644", str(index_html)])
 
 def rollback_user_creation(username):
+    errors = []
+
     try:
         delete_user(username)
-    except Exception:
-        pass
+    except Exception as exc:
+        errors.append(f"directory cleanup failed: {exc}")
 
     if user_exists(username):
-        run(["deluser", "--remove-home", username])
+        try:
+            run(["deluser", "--remove-home", username])
+        except subprocess.CalledProcessError as exc:
+            errors.append(f"account cleanup failed: {exc}")
+
+    if user_exists(username):
+        errors.append(f"account still exists: {username}")
+
+    if errors:
+        return False, "; ".join(errors)
+
+    return True, None
 
 def update_directory(app, username):
     username = username.strip().lower()
@@ -388,29 +401,39 @@ def main():
                         update_directory(app, username)
                         mark_handled(app, "approved", username)
                     except subprocess.CalledProcessError as e:
+                        rollback_ok = True
+                        rollback_error = None
                         if created_user:
-                            try:
-                                rollback_user_creation(username)
-                            except subprocess.CalledProcessError:
-                                pass
+                            rollback_ok, rollback_error = rollback_user_creation(username)
                         clear_screen()
                         print(f"Command failed: {e}")
                         print("Application was NOT marked handled.")
                         if created_user:
-                            print("Partial user creation was rolled back.")
+                            if rollback_ok:
+                                print("Partial user creation was rolled back.")
+                            else:
+                                print("Rollback failed. Account may still exist.")
+                                print(f"Rollback error: {rollback_error}")
+                                print(f"Manual check: id {username}")
+                                print(f"Manual check: ls -ld /home/{username}")
                         input("\nPress Enter to continue.")
                         continue
                     except Exception as e:
+                        rollback_ok = True
+                        rollback_error = None
                         if created_user:
-                            try:
-                                rollback_user_creation(username)
-                            except subprocess.CalledProcessError:
-                                pass
+                            rollback_ok, rollback_error = rollback_user_creation(username)
                         clear_screen()
                         print(f"Error: {e}")
                         print("Application was NOT marked handled.")
                         if created_user:
-                            print("Partial user creation was rolled back.")
+                            if rollback_ok:
+                                print("Partial user creation was rolled back.")
+                            else:
+                                print("Rollback failed. Unix account may still exist.")
+                                print(f"Rollback error: {rollback_error}")
+                                print(f"Manual check: id {username}")
+                                print(f"Manual check: ls -ld /home/{username}")
                         input("\nPress Enter to continue.")
                         continue
 

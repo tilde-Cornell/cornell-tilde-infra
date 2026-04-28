@@ -126,5 +126,6 @@ it will ask:
 ```
 Join Password: (input password you wish to publicly share)
 Domain: (ie. cornelltilde.com or dev.cornelltilde.com)
+Admin contact email: ie. admin@cornelltilde.com
 ```
 

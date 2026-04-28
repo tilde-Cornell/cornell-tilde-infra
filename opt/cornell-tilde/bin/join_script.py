@@ -6,7 +6,7 @@ import sys
 
 sys.path.insert(0, "/opt/cornell-tilde/lib")
 
-from cornell_tilde.config import SITE_DOMAIN, SITE_URL
+from cornell_tilde.config import ADMIN_EMAIL, SITE_DOMAIN, SITE_URL
 from cornell_tilde.db import get_connection
 
 EMAIL_REGEX = re.compile(r"^[A-Za-z0-9]+@cornell\.edu$")
@@ -332,7 +332,7 @@ def show_intro():
     print("This form is used to request access to tilde@Cornell.")
     print()
     print("For help, contact the admin at:")
-    print("admin@cornelltilde.com")
+    print(ADMIN_EMAIL)
     print()
     print("By using this service, you agree to follow:")
     print("- Cornell IT policies")
@@ -412,7 +412,7 @@ def main() -> int:
     except Exception:
         leave_screen()
         print("There was an error submitting your application.")
-        print("Please contact the site admin at admin@cornelltilde.com.")
+        print(f"Please contact the site admin at {ADMIN_EMAIL}.")
         return 1
     finally:
         leave_screen()
@@ -422,7 +422,7 @@ def main() -> int:
     print(f"Application ID: {application_id}")
     print()
     print("Thanks! We will review your request and contact you by email.")
-    print("For help, contact admin@cornelltilde.com.")
+    print(f"For help, contact {ADMIN_EMAIL}.")
     print()
     return 0
 

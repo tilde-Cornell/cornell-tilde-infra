@@ -13,8 +13,11 @@ read -rsp "Password for join user: " JOIN_PASSWORD
 echo
 read -rp "Server domain (example: cornelltilde.com or dev.cornelltilde.com): " SERVER_DOMAIN
 echo
+read -rp "Admin contact email (example: admin@cornelltilde.com): " ADMIN_EMAIL
+echo
 
 echo "Server domain: $SERVER_DOMAIN"
+echo "Admin contact email: $ADMIN_EMAIL"
 echo
 
 echo "=== Installing packages ==="
@@ -70,6 +73,7 @@ sudo mkdir -p /var/www/html
 
 sudo tee /opt/cornell-tilde/.env > /dev/null <<EOC
 SITE_DOMAIN=$SERVER_DOMAIN
+ADMIN_EMAIL=$ADMIN_EMAIL
 EOC
 
 echo
@@ -127,7 +131,7 @@ https://$SERVER_DOMAIN/ssh/
 
 If you need help, have account issues, or notice something broken:
 
-admin@cornelltilde.com
+$ADMIN_EMAIL
 EOC
 
 echo
