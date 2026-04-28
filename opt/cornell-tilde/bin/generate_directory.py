@@ -77,6 +77,16 @@ def render_pagination(page_number: int, page_count: int) -> str:
 </nav>
 """
 
+def render_page_count(page_number: int, page_count: int) -> str:
+    if page_count <= 1:
+        return ""
+
+    return f"""
+  <p>
+    Page <strong>{page_number}</strong> of <strong>{page_count}</strong>.
+  </p>
+"""
+
 def main():
     users = get_public_users()
     member_count = len(users)
@@ -99,8 +109,7 @@ def main():
         page = template.format(
             member_count=member_count,
             member_label=member_label,
-            page_number=page_number,
-            page_count=page_count,
+            page_count_line=render_page_count(page_number, page_count),
             site_domain=SITE_DOMAIN,
             site_url=SITE_URL,
             cards=render_cards(page_users),
