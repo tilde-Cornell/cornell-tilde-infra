@@ -239,10 +239,17 @@ echo "=== Directory rebuild watcher ==="
 sudo systemctl daemon-reload
 sudo systemctl enable --now cornell-tilde-directory.path
 
+sudo sqlite3 /opt/cornell-tilde/var/cornell_tilde.sqlite3 "
+  UPDATE directory_modified
+  SET modified = 1,
+      updated_at = CURRENT_TIMESTAMP
+  WHERE id = 1;
+"
+
 echo
 echo "=== Final verification ==="
 
-sudo /usr/local/sbin/generate_directory.py
+sudo systemctl start cornell-tilde-directory.service
 
 sudo apache2ctl configtest
 sudo sshd -t

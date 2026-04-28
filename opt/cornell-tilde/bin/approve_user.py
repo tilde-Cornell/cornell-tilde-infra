@@ -9,7 +9,6 @@ from pathlib import Path
 sys.path.insert(0, "/opt/cornell-tilde/lib")
 
 from cornell_tilde.config import (
-    GENERATE_DIRECTORY,
     USER_HOMEPAGE_TEMPLATE,
 )
 from cornell_tilde.db import (
@@ -227,13 +226,6 @@ def update_directory(app, username):
         tilde_compute={},
     )
 
-def regenerate_directory():
-    if not GENERATE_DIRECTORY.exists():
-        print("Warning: directory generator script does not exist.")
-        return
-
-    run([str(GENERATE_DIRECTORY)])
-
 def mark_handled(app, decision, final_username=None):
     set_application_status(
         application_id=app.get("application_id"),
@@ -391,7 +383,6 @@ def main():
                         create_user(app, username, app.get("ssh_key", ""))
                         created_user = True
                         update_directory(app, username)
-                        regenerate_directory()
                         mark_handled(app, "approved", username)
                     except subprocess.CalledProcessError as e:
                         if created_user:
