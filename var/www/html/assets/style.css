@@ -156,6 +156,39 @@ code {
   border-radius: 4px;
 }
 
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 14px 18px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--cornell-red);
+  border-radius: 10px;
+}
+
+.pagination a,
+.pagination span,
+.pagination strong {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+.pagination-pages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pagination strong {
+  color: var(--white);
+}
+
 .floating-join {
   position: fixed;
   bottom: 20px;
