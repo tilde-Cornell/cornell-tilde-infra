@@ -10,12 +10,31 @@ section "SSH configuration"
 
 python3 - <<'PY'
 from pathlib import Path
+import re
 
 path = Path("/etc/ssh/sshd_config")
 text = path.read_text()
 
+managed_keys = {
+    "PermitRootLogin": "no",
+    "PasswordAuthentication": "no",
+    "PermitUserEnvironment": "no",
+}
+managed_key_names = {key.lower() for key in managed_keys}
+
+text = re.sub(
+    r"(?ms)^# BEGIN CORNELL TILDE GLOBALS\n.*?^# END CORNELL TILDE GLOBALS\n?",
+    "",
+    text,
+)
+text = re.sub(
+    r"(?ms)^# BEGIN CORNELL TILDE JOIN\n.*?^# END CORNELL TILDE JOIN\n?",
+    "",
+    text,
+)
+
 lines = text.splitlines()
-new_lines = []
+without_old_join = []
 inside_join_block = False
 
 for line in lines:
@@ -28,57 +47,61 @@ for line in lines:
     if inside_join_block:
         if stripped.startswith("Match "):
             inside_join_block = False
-            new_lines.append(line)
+            without_old_join.append(line)
         else:
             continue
     else:
-        new_lines.append(line)
+        without_old_join.append(line)
 
 first_match = next(
-    (index for index, line in enumerate(new_lines) if line.strip().startswith("Match ")),
-    len(new_lines),
+    (index for index, line in enumerate(without_old_join) if line.strip().startswith("Match ")),
+    len(without_old_join),
 )
 
-global_lines = new_lines[:first_match]
-match_lines = new_lines[first_match:]
-
-managed_keys = {
-    "PermitRootLogin": "no",
-    "PasswordAuthentication": "no",
-    "PermitUserEnvironment": "no",
-}
+global_lines = without_old_join[:first_match]
+match_lines = without_old_join[first_match:]
 
 filtered_global = []
-include_seen = False
 
 for line in global_lines:
     stripped = line.strip()
     parts = stripped.split()
 
-    if stripped == "Include /etc/ssh/sshd_config.d/*.conf":
-        include_seen = True
-
     if stripped.startswith("#") or not parts:
         filtered_global.append(line)
         continue
 
-    if parts[0] in managed_keys:
+    if parts[0].lower() in managed_key_names:
         continue
 
     filtered_global.append(line)
 
-if not include_seen:
-    filtered_global.append("Include /etc/ssh/sshd_config.d/*.conf")
+globals_block = [
+    "# BEGIN CORNELL TILDE GLOBALS",
+    "PermitRootLogin no",
+    "PasswordAuthentication no",
+    "PermitUserEnvironment no",
+    "# END CORNELL TILDE GLOBALS",
+]
 
-for key, value in managed_keys.items():
-    filtered_global.append(f"{key} {value}")
+first_include = next(
+    (
+        index
+        for index, line in enumerate(filtered_global)
+        if line.strip()
+        and not line.strip().startswith("#")
+        and line.strip().split()[0].lower() == "include"
+    ),
+    len(filtered_global),
+)
+filtered_global = (
+    filtered_global[:first_include]
+    + globals_block
+    + filtered_global[first_include:]
+)
 
-path.write_text("\n".join(filtered_global + match_lines).rstrip() + "\n")
-
-dropin_dir = Path("/etc/ssh/sshd_config.d")
-dropin_dir.mkdir(parents=True, exist_ok=True)
-dropin = dropin_dir / "99-cornell-tilde-join.conf"
-dropin.write_text("""\
+join_block = """\
+# BEGIN CORNELL TILDE JOIN
 Match User join
         ForceCommand /opt/cornell-tilde/bin/join_script_wrapper.sh
         PasswordAuthentication yes
@@ -88,7 +111,14 @@ Match User join
         AllowTcpForwarding no
         AllowAgentForwarding no
         PermitTunnel no
-""")
+""".splitlines()
+
+dropin = Path("/etc/ssh/sshd_config.d/99-cornell-tilde-join.conf")
+if dropin.exists():
+    dropin.unlink()
+
+output = filtered_global + match_lines + join_block
+path.write_text("\n".join(output).rstrip() + "\n")
 PY
 
 sshd -t

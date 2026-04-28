@@ -96,6 +96,8 @@ find "$WEB_ROOT" -type f -exec chmod 644 {} \;
 
 section "Command and systemd links"
 
+chmod 755 /deploy/apply-runtime.sh /deploy/configure-ssh.sh /deploy/post-deploy.sh /deploy/common.sh
+
 ln -sf "$PROJECT_ROOT/bin/approve_user.py" /usr/local/sbin/approve_user.py
 ln -sf "$PROJECT_ROOT/bin/generate_directory.py" /usr/local/sbin/generate_directory.py
 ln -sf "$PROJECT_ROOT/bin/join_script.py" /usr/local/sbin/join_script.py
