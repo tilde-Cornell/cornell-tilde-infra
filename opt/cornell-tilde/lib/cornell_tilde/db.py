@@ -83,6 +83,24 @@ def _json_dumps(value: Optional[dict[str, Any]]) -> str:
 
     return json.dumps(value, sort_keys=True, separators=(",", ":"))
 
+def _permissions_from_json(value: Optional[str]) -> dict[str, Any]:
+    return _json_loads_or_empty(value)
+
+def _permissions_to_json(permissions: Optional[dict[str, Any]]) -> str:
+    return _json_dumps(permissions)
+
+def _tilde_compute_from_json(value: Optional[str]) -> dict[str, Any]:
+    return _json_loads_or_empty(value)
+
+def _tilde_compute_to_json(tilde_compute: Optional[dict[str, Any]]) -> str:
+    return _json_dumps(tilde_compute)
+
+def _user_from_row(row: sqlite3.Row) -> dict[str, Any]:
+    user = dict(row)
+    user["permissions"] = _permissions_from_json(user.pop("permissions_json", DEFAULT_JSON))
+    user["tilde_compute"] = _tilde_compute_from_json(user.pop("tilde_compute_json", DEFAULT_JSON))
+    return user
+
 def get_user(username: str) -> Optional[dict]:
     with get_connection() as conn:
         row = conn.execute("""
@@ -106,7 +124,7 @@ def get_user(username: str) -> Optional[dict]:
     if row is None:
         return None
 
-    return dict(row)
+    return _user_from_row(row)
 
 def get_public_users() -> list[dict]:
     with get_connection() as conn:
@@ -118,13 +136,15 @@ def get_public_users() -> list[dict]:
                 college,
                 grad_year,
                 bio,
-                is_admin
+                is_admin,
+                permissions_json,
+                tilde_compute_json
             FROM users
             WHERE public = 1
             ORDER BY username COLLATE NOCASE
         """).fetchall()
 
-    return [dict(row) for row in rows]
+    return [_user_from_row(row) for row in rows]
 
 def get_all_users() -> list[dict]:
     with get_connection() as conn:
@@ -146,7 +166,7 @@ def get_all_users() -> list[dict]:
             ORDER BY username COLLATE NOCASE
         """).fetchall()
 
-    return [dict(row) for row in rows]
+    return [_user_from_row(row) for row in rows]
 
 def get_admin_users() -> list[dict]:
     with get_connection() as conn:
@@ -169,7 +189,7 @@ def get_admin_users() -> list[dict]:
             ORDER BY username COLLATE NOCASE
         """).fetchall()
 
-    return [dict(row) for row in rows]
+    return [_user_from_row(row) for row in rows]
 
 def add_user_to_directory(
     username: str,
@@ -183,47 +203,41 @@ def add_user_to_directory(
     permissions: Optional[dict[str, Any]] = None,
     tilde_compute: Optional[dict[str, Any]] = None,
 ) -> None:
-    permissions_json = _json_dumps(permissions)
-    tilde_compute_json = _json_dumps(tilde_compute)
+    permissions_json = _permissions_to_json(permissions)
+    tilde_compute_json = _tilde_compute_to_json(tilde_compute)
 
-    with get_connection() as conn:
-        conn.execute("""
-            INSERT INTO users (
+    try:
+        with get_connection() as conn:
+            conn.execute("""
+                INSERT INTO users (
+                    username,
+                    name,
+                    email,
+                    college,
+                    grad_year,
+                    bio,
+                    public,
+                    is_admin,
+                    permissions_json,
+                    tilde_compute_json
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
                 username,
                 name,
                 email,
                 college,
                 grad_year,
-                bio,
-                public,
-                is_admin,
+                bio or "",
+                1 if public else 0,
+                1 if is_admin else 0,
                 permissions_json,
-                tilde_compute_json
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON CONFLICT(username) DO UPDATE SET
-                name = excluded.name,
-                email = excluded.email,
-                college = excluded.college,
-                grad_year = excluded.grad_year,
-                bio = excluded.bio,
-                public = excluded.public,
-                is_admin = users.is_admin,
-                permissions_json = COALESCE(users.permissions_json, '{}'),
-                tilde_compute_json = COALESCE(users.tilde_compute_json, '{}'),
-                updated_at = CURRENT_TIMESTAMP
-        """, (
-            username,
-            name,
-            email,
-            college,
-            grad_year,
-            bio or "",
-            1 if public else 0,
-            1 if is_admin else 0,
-            permissions_json,
-            tilde_compute_json,
-        ))
+                tilde_compute_json,
+            ))
+    except sqlite3.IntegrityError as exc:
+        if "users.username" in str(exc):
+            raise ValueError(f"user already exists: {username}") from exc
+        raise
 
 def update_user_profile(
     username: str,
@@ -284,7 +298,7 @@ def get_user_permissions(username: str) -> dict[str, Any]:
     if user is None:
         return {}
 
-    return _json_loads_or_empty(user.get("permissions_json"))
+    return user.get("permissions", {})
 
 def set_user_permissions(username: str, permissions: dict[str, Any]) -> None:
     with get_connection() as conn:
@@ -293,7 +307,7 @@ def set_user_permissions(username: str, permissions: dict[str, Any]) -> None:
             SET permissions_json = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE username = ?
-        """, (_json_dumps(permissions), username))
+        """, (_permissions_to_json(permissions), username))
 
 def get_user_tilde_compute(username: str) -> dict[str, Any]:
     user = get_user(username)
@@ -301,7 +315,7 @@ def get_user_tilde_compute(username: str) -> dict[str, Any]:
     if user is None:
         return {}
 
-    return _json_loads_or_empty(user.get("tilde_compute_json"))
+    return user.get("tilde_compute", {})
 
 def set_user_tilde_compute(username: str, tilde_compute: dict[str, Any]) -> None:
     with get_connection() as conn:
@@ -310,7 +324,7 @@ def set_user_tilde_compute(username: str, tilde_compute: dict[str, Any]) -> None
             SET tilde_compute_json = ?,
                 updated_at = CURRENT_TIMESTAMP
             WHERE username = ?
-        """, (_json_dumps(tilde_compute), username))
+        """, (_tilde_compute_to_json(tilde_compute), username))
 
 def set_user_public(username: str, public: bool) -> None:
     update_user_profile(username=username, public=public)
