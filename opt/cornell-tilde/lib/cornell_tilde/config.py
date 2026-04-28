@@ -2,13 +2,16 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv(".env")
-BASE_DIR = Path(os.getenv("BASE_DIR", "/opt/cornell-tilde"))
+RAW_BASE_DIR = os.getenv("BASE_DIR", "/opt/cornell-tilde")
+BASE_DIR = Path(RAW_BASE_DIR)
+load_dotenv(BASE_DIR / ".env")
 
 BIN_DIR = BASE_DIR / "bin"
 LIB_DIR = BASE_DIR / "lib"
 VAR_DIR = BASE_DIR / "var"
 TEMPLATE_DIR = BASE_DIR / "templates"
+SITE_DOMAIN = os.getenv("SITE_DOMAIN", "cornelltilde.com")
+SITE_URL = f"https://{SITE_DOMAIN}"
 
 DATABASE_PATH = VAR_DIR / "cornell_tilde.sqlite3"
 

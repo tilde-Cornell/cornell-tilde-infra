@@ -9,6 +9,8 @@ from pathlib import Path
 sys.path.insert(0, "/opt/cornell-tilde/lib")
 
 from cornell_tilde.config import (
+    SITE_DOMAIN,
+    SITE_URL,
     USER_HOMEPAGE_TEMPLATE,
 )
 from cornell_tilde.db import (
@@ -178,6 +180,7 @@ def create_user(app, username, ssh_key):
     homepage = template.format(
         username=username,
         display_name=display_name,
+        site_url=SITE_URL,
     )
 
     index_html.write_text(homepage, encoding="utf-8")
@@ -255,11 +258,11 @@ def print_welcome(username, email):
 
 You can log in with:
 
-ssh {username}@cornelltilde.com
+ssh {username}@{SITE_DOMAIN}
 
 Your personal webpage is available at:
 
-https://cornelltilde.com/~{username}
+{SITE_URL}/~{username}
 
 Your website files live in:
 

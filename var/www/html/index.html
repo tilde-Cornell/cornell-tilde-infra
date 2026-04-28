@@ -9,13 +9,13 @@
     <meta property="og:title" content="tilde@Cornell">
     <meta property="og:description" content="A student-run Unix shell server and personal web hosting community for Cornell students.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://cornelltilde.com/">
-    <meta property="og:image" content="https://cornelltilde.com/preview.png">
+    <meta property="og:url" content="/">
+    <meta property="og:image" content="/preview.png">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="tilde@Cornell">
     <meta name="twitter:description" content="Shell access, personal web pages, SSH onboarding, and a student-run Unix community at Cornell.">
-    <meta name="twitter:image" content="https://cornelltilde.com/preview.png">
+    <meta name="twitter:image" content="/preview.png">
     </head>
     <body>
     <nav class="top-nav">
@@ -42,7 +42,7 @@
       </p>
 
       <p>
-        <strong>https://cornelltilde.com/~username</strong>
+        <strong id="site-example-url">https://this-domain/~username</strong>
       </p>
     </div>
 
@@ -54,7 +54,7 @@
       </p>
 
       <div class="terminal">
-        ssh join@cornelltilde.com<br>
+        <span id="join-command">ssh join@this-domain</span><br>
         Password: GO BIG RED
       </div>
       <br>
@@ -90,7 +90,7 @@
 
   <p>
     If SSH shows a different fingerprint, your network may be redirecting
-    cornelltilde.com. This can happen on school or managed networks.
+    <span id="site-domain-warning">this-domain</span>. This can happen on school or managed networks.
   </p>
 
   <p>
@@ -114,6 +114,15 @@
     <footer>
       tilde@Cornell is a student-run project and is not an official Cornell University service.
     </footer>
+
+    <script>
+      const currentOrigin = window.location.origin;
+      const currentHost = window.location.host;
+
+      document.getElementById("site-example-url").textContent = `${currentOrigin}/~username`;
+      document.getElementById("join-command").textContent = `ssh join@${currentHost}`;
+      document.getElementById("site-domain-warning").textContent = currentHost;
+    </script>
 
     </body>
     </html>

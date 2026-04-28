@@ -6,6 +6,7 @@ import sys
 
 sys.path.insert(0, "/opt/cornell-tilde/lib")
 
+from cornell_tilde.config import SITE_DOMAIN, SITE_URL
 from cornell_tilde.db import get_connection
 
 EMAIL_REGEX = re.compile(r"^[A-Za-z0-9]+@cornell\.edu$")
@@ -104,8 +105,8 @@ def ask_username() -> str:
         print("This will be used for SSH and your public page.")
         print()
         print("Example:")
-        print("  ssh yourusername@cornelltilde.com")
-        print("  https://cornelltilde.com/~yourusername")
+        print(f"  ssh yourusername@{SITE_DOMAIN}")
+        print(f"  {SITE_URL}/~yourusername")
         print()
         print("Rules: 2-32 characters, lowercase letters, numbers, or _")
         print("Must start with a lowercase letter.")
@@ -253,7 +254,7 @@ def ask_ssh_key() -> str:
         print("ssh-ed25519 AAAAC3... your_netid@cornell.edu")
         print()
         print("Need help?")
-        print("https://cornelltilde.com/ssh/")
+        print(f"{SITE_URL}/ssh/")
         print()
 
         key1 = input("SSH Public Key: ").strip()

@@ -4,7 +4,7 @@ import html
 
 sys.path.insert(0, "/opt/cornell-tilde/lib")
 
-from cornell_tilde.config import DIRECTORY_TEMPLATE, DIRECTORY_OUTPUT
+from cornell_tilde.config import DIRECTORY_TEMPLATE, DIRECTORY_OUTPUT, SITE_DOMAIN, SITE_URL
 from cornell_tilde.db import get_public_users
 
 def main():
@@ -23,7 +23,7 @@ def main():
   <p><strong>Name:</strong> {name}</p>
   <p><strong>College:</strong> {college}</p>
   <p><strong>Graduation Year:</strong> {grad_year}</p>
-  <p><strong>Website:</strong> <a href="/~{username}">cornelltilde.com/~{username}</a></p>
+  <p><strong>Website:</strong> <a href="/~{username}">{SITE_DOMAIN}/~{username}</a></p>
   <p><strong>Bio:</strong> {bio}</p>
 </div>
 """
@@ -36,6 +36,8 @@ def main():
     page = template.format(
         member_count=member_count,
         member_label=member_label,
+        site_domain=SITE_DOMAIN,
+        site_url=SITE_URL,
         cards="".join(cards)
     )
 

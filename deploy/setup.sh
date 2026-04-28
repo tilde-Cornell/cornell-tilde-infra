@@ -68,6 +68,10 @@ sudo mkdir -p /opt/cornell-tilde/var
 sudo mkdir -p /opt/cornell-tilde/backups
 sudo mkdir -p /var/www/html
 
+sudo tee /opt/cornell-tilde/.env > /dev/null <<EOC
+SITE_DOMAIN=$SERVER_DOMAIN
+EOC
+
 echo
 echo "=== Database setup ==="
 

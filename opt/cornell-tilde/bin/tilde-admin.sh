@@ -6,6 +6,13 @@ PROJECT_ROOT="/opt/cornell-tilde"
 DB_PATH="$PROJECT_ROOT/var/cornell_tilde.sqlite3"
 WEB_ROOT="/var/www/html"
 BACKUP_DIR="/var/backups/cornell-tilde"
+SITE_DOMAIN="cornelltilde.com"
+
+if [ -f "$PROJECT_ROOT/.env" ]; then
+  set -a
+  . "$PROJECT_ROOT/.env"
+  set +a
+fi
 
 if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
   ADMIN_USER="$SUDO_USER"
@@ -92,13 +99,13 @@ check_web() {
   echo "--- Web Tests ---"
 
   echo -n "Home Page:      "
-  curl -Is https://cornelltilde.com | head -n 1 || true
+  curl -Is "https://$SITE_DOMAIN" | head -n 1 || true
 
   echo -n "Directory Page: "
-  curl -Is https://cornelltilde.com/directory/ | head -n 1 || true
+  curl -Is "https://$SITE_DOMAIN/directory/" | head -n 1 || true
 
   echo -n "SSH Docs Page:  "
-  curl -Is https://cornelltilde.com/ssh/ | head -n 1 || true
+  curl -Is "https://$SITE_DOMAIN/ssh/" | head -n 1 || true
 
   echo
 }
@@ -200,7 +207,7 @@ create_backup() {
     echo
     echo "From your local Mac, run:"
     echo
-    echo "scp $ADMIN_USER@cornelltilde.com:~/backups/$(basename "$archive") ."
+    echo "scp $ADMIN_USER@$SITE_DOMAIN:~/backups/$(basename "$archive") ."
     echo
   else
     echo
