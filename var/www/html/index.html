@@ -117,11 +117,11 @@
 
     <script>
       const currentOrigin = window.location.origin;
-      const currentHost = window.location.host;
+      const currentHostname = window.location.hostname;
 
       document.getElementById("site-example-url").textContent = `${currentOrigin}/~username`;
-      document.getElementById("join-command").textContent = `ssh join@${currentHost}`;
-      document.getElementById("site-domain-warning").textContent = currentHost;
+      document.getElementById("join-command").textContent = `ssh join@${currentHostname}`;
+      document.getElementById("site-domain-warning").textContent = currentHostname;
     </script>
 
     </body>

@@ -161,12 +161,12 @@ Password: GO BIG RED
 </footer>
 
 <script>
-  const currentHost = window.location.host;
+  const currentHostname = window.location.hostname;
 
-  document.getElementById("ssh-domain-warning").textContent = currentHost;
-  document.getElementById("remove-known-host").textContent = `ssh-keygen -R ${currentHost}`;
-  document.getElementById("join-command").textContent = `ssh join@${currentHost}`;
-  document.getElementById("apply-join-command").textContent = `ssh join@${currentHost}`;
+  document.getElementById("ssh-domain-warning").textContent = currentHostname;
+  document.getElementById("remove-known-host").textContent = `ssh-keygen -R ${currentHostname}`;
+  document.getElementById("join-command").textContent = `ssh join@${currentHostname}`;
+  document.getElementById("apply-join-command").textContent = `ssh join@${currentHostname}`;
 </script>
 
 </body>
