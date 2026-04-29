@@ -1,7 +1,5 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv()
 
 
 def load_env_file(path: Path) -> None:
@@ -24,7 +22,10 @@ def load_env_file(path: Path) -> None:
             value = value[1:-1]
 
         os.environ.setdefault(key, value)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 68f227d (cleaned up dotenv requirement mismatch, pulls env manually as there were conflict issues with python dotenv libs)
 
 RAW_BASE_DIR = os.getenv("BASE_DIR", "/opt/cornell-tilde")
 BASE_DIR = Path(RAW_BASE_DIR)
