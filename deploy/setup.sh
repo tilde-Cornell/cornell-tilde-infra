@@ -33,7 +33,7 @@ sudo apt install -y \
   acl \
   sqlite3 \
   python3 \
-  python3-pip \
+  python3-dotenv \
   apache2 \
   openssh-server \
   fail2ban \
@@ -41,8 +41,6 @@ sudo apt install -y \
   certbot \
   python3-certbot-apache \
   unattended-upgrades
-
-sudo python3 -m pip install --break-system-packages python-dotenv
 
 echo
 echo "=== Enabling services ==="
