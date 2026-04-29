@@ -42,7 +42,7 @@
       </p>
 
       <p>
-        <strong>https://cornelltilde.com/~username</strong>
+        <strong id="site-example-url">https://cornelltilde.com/~username</strong>
       </p>
     </div>
 
@@ -54,7 +54,7 @@
       </p>
 
       <div class="terminal">
-        ssh join@cornelltilde.com<br>
+        <span id="join-command">ssh join@cornelltilde.com</span><br>
         Password: GO BIG RED
       </div>
       <br>
@@ -90,7 +90,7 @@
 
   <p>
     If SSH shows a different fingerprint, your network may be redirecting
-    cornelltilde.com. This can happen on school or managed networks.
+    <span id="site-domain-warning">cornelltilde.com</span>. This can happen on school or managed networks.
   </p>
 
   <p>
@@ -114,6 +114,15 @@
     <footer>
       tilde@Cornell is a student-run project and is not an official Cornell University service.
     </footer>
+
+    <script>
+      const currentOrigin = window.location.origin;
+      const currentHostname = window.location.hostname;
+
+      document.getElementById("site-example-url").textContent = `${currentOrigin}/~username`;
+      document.getElementById("join-command").textContent = `ssh join@${currentHostname}`;
+      document.getElementById("site-domain-warning").textContent = currentHostname;
+    </script>
 
     </body>
     </html>

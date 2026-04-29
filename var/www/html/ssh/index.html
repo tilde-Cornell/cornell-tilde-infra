@@ -38,7 +38,7 @@
 </div>
   <p>
     If SSH shows a different fingerprint, do not continue. Your network may be
-    redirecting cornelltilde.com, especially on school or managed networks.
+    redirecting <span id="ssh-domain-warning">cornelltilde.com</span>, especially on school or managed networks.
   </p>
 
   <p>
@@ -46,8 +46,9 @@
   </p>
 
   <div class="terminal">
-ssh-keygen -R cornelltilde.com
-ssh join@cornelltilde.com
+<span id="remove-known-host">ssh-keygen -R cornelltilde.com</span>
+<br>
+<span id="join-command">ssh join@cornelltilde.com</span>
   </div>
 </div>
 
@@ -150,7 +151,7 @@ ssh-keygen -t ed25519 -C "your_netid@cornell.edu"
   </p>
 
   <div class="terminal">
-ssh join@cornelltilde.com
+<span id="apply-join-command">ssh join@cornelltilde.com</span>
 Password: GO BIG RED
   </div>
 </div>
@@ -158,6 +159,15 @@ Password: GO BIG RED
 <footer>
   tilde@Cornell is a student-run project and is not an official Cornell University service.
 </footer>
+
+<script>
+  const currentHostname = window.location.hostname;
+
+  document.getElementById("ssh-domain-warning").textContent = currentHostname;
+  document.getElementById("remove-known-host").textContent = `ssh-keygen -R ${currentHostname}`;
+  document.getElementById("join-command").textContent = `ssh join@${currentHostname}`;
+  document.getElementById("apply-join-command").textContent = `ssh join@${currentHostname}`;
+</script>
 
 </body>
 </html>

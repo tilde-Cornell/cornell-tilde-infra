@@ -4,24 +4,27 @@ import pwd
 import re
 import subprocess
 import sys
+import html
 from pathlib import Path
 
 sys.path.insert(0, "/opt/cornell-tilde/lib")
 
 from cornell_tilde.config import (
-    GENERATE_DIRECTORY,
+    SITE_DOMAIN,
+    SITE_URL,
     USER_HOMEPAGE_TEMPLATE,
 )
 from cornell_tilde.db import (
     add_user_to_directory,
+    delete_user,
     get_all_users,
     get_pending_applications,
-    update_application_status,
+    set_application_status,
 )
 
 TEMPLATE_FILE = USER_HOMEPAGE_TEMPLATE
 
-USERNAME_RE = re.compile(r"^[a-z][a-z0-9_]{1,31}$")
+USERNAME_RE = re.compile(r"^[a-z][a-z0-9_-]{1,31}$")
 
 def run(cmd):
     subprocess.run(cmd, check=True)
@@ -172,12 +175,13 @@ def create_user(app, username, ssh_key):
 
     public_html.mkdir(parents=True, exist_ok=True)
 
-    display_name = app.get("name", username)
+    display_name = html.escape(app.get("name", username), quote=True)
 
     template = TEMPLATE_FILE.read_text(encoding="utf-8")
     homepage = template.format(
         username=username,
         display_name=display_name,
+        site_url=SITE_URL,
     )
 
     index_html.write_text(homepage, encoding="utf-8")
@@ -188,6 +192,28 @@ def create_user(app, username, ssh_key):
     run(["chmod", "600", str(auth_keys)])
     run(["chmod", "755", str(public_html)])
     run(["chmod", "644", str(index_html)])
+
+def rollback_user_creation(username):
+    errors = []
+
+    try:
+        delete_user(username)
+    except Exception as exc:
+        errors.append(f"directory cleanup failed: {exc}")
+
+    if user_exists(username):
+        try:
+            run(["deluser", "--remove-home", username])
+        except subprocess.CalledProcessError as exc:
+            errors.append(f"account cleanup failed: {exc}")
+
+    if user_exists(username):
+        errors.append(f"account still exists: {username}")
+
+    if errors:
+        return False, "; ".join(errors)
+
+    return True, None
 
 def update_directory(app, username):
     username = username.strip().lower()
@@ -217,15 +243,8 @@ def update_directory(app, username):
         tilde_compute={},
     )
 
-def regenerate_directory():
-    if not GENERATE_DIRECTORY.exists():
-        print("Warning: directory generator script does not exist.")
-        return
-
-    run([str(GENERATE_DIRECTORY)])
-
 def mark_handled(app, decision, final_username=None):
-    update_application_status(
+    set_application_status(
         application_id=app.get("application_id"),
         status=decision,
         final_username=final_username,
@@ -253,11 +272,11 @@ def print_welcome(username, email):
 
 You can log in with:
 
-ssh {username}@cornelltilde.com
+ssh {username}@{SITE_DOMAIN}
 
 Your personal webpage is available at:
 
-https://cornelltilde.com/~{username}
+{SITE_URL}/~{username}
 
 Your website files live in:
 
@@ -376,21 +395,46 @@ def main():
                         input("\nApproval canceled. Press Enter to return to review.")
                         continue
 
+                    created_user = False
                     try:
                         create_user(app, username, app.get("ssh_key", ""))
+                        created_user = True
                         update_directory(app, username)
-                        regenerate_directory()
                         mark_handled(app, "approved", username)
                     except subprocess.CalledProcessError as e:
+                        rollback_ok = True
+                        rollback_error = None
+                        if created_user:
+                            rollback_ok, rollback_error = rollback_user_creation(username)
                         clear_screen()
                         print(f"Command failed: {e}")
                         print("Application was NOT marked handled.")
+                        if created_user:
+                            if rollback_ok:
+                                print("Partial user creation was rolled back.")
+                            else:
+                                print("Rollback failed. Account may still exist.")
+                                print(f"Rollback error: {rollback_error}")
+                                print(f"Manual check: id {username}")
+                                print(f"Manual check: ls -ld /home/{username}")
                         input("\nPress Enter to continue.")
                         continue
                     except Exception as e:
+                        rollback_ok = True
+                        rollback_error = None
+                        if created_user:
+                            rollback_ok, rollback_error = rollback_user_creation(username)
                         clear_screen()
                         print(f"Error: {e}")
                         print("Application was NOT marked handled.")
+                        if created_user:
+                            if rollback_ok:
+                                print("Partial user creation was rolled back.")
+                            else:
+                                print("Rollback failed. Unix account may still exist.")
+                                print(f"Rollback error: {rollback_error}")
+                                print(f"Manual check: id {username}")
+                                print(f"Manual check: ls -ld /home/{username}")
                         input("\nPress Enter to continue.")
                         continue
 

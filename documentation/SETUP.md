@@ -18,7 +18,7 @@ no outbound firewall restrictions
 ```bash
 adduser (username)
 usermod -aG sudo (username)
-  ```
+```
 
 
 ## Copy root SSH key to admin
@@ -52,7 +52,7 @@ sudo cat /root/.ssh/id_ed25519_github.pub
 Repo
 -> Settings
 -> Deploy keys
--> Add deploy key``
+-> Add deploy key
 ```
 
 `Allow write access: OFF`
@@ -71,7 +71,7 @@ sudo chmod 700 /root/.ssh
 sudo chmod 600 /root/.ssh/config
 ```
 
-## Test GitHub access! If it doesnt work, oh well
+## Test GitHub access
 ```bash
 sudo ssh -T git@github.com
 ```
@@ -122,9 +122,17 @@ sudo chmod +x /deploy/setup.sh
 sudo /deploy/setup.sh
 ```
 
-it will ask:
+The installer sets the public `join` password to `GO BIG RED`, matching the public website and generated directory. It will ask:
 ```
-Join Password: (input password you wish to publicly share)
 Domain: (ie. cornelltilde.com or dev.cornelltilde.com)
+Admin contact email: ie. admin@cornelltilde.com
 ```
 
+## Deploy updates after setup
+
+After pulling a new branch or commit into the root worktree, reapply runtime state:
+
+```bash
+prodgit pull origin development
+sudo post-deploy
+```

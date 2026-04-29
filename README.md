@@ -10,7 +10,12 @@
 
 pls don't commit databases or user data
 
-read SETUP.md for information on how to set up
+documentation:
+- [`documentation/SETUP.md`](documentation/SETUP.md) - fresh server setup checklist
+- [`documentation/SYSTEM_OVERVIEW.md`](documentation/SYSTEM_OVERVIEW.md) - high-level architecture and runtime paths
+- [`documentation/APPLICATION_AND_ACCOUNT_FLOW.md`](documentation/APPLICATION_AND_ACCOUNT_FLOW.md) - join, application, approval, and account creation flow
+- [`documentation/DATABASE_AND_DIRECTORY.md`](documentation/DATABASE_AND_DIRECTORY.md) - database schema, db.py helpers, and generated directory behavior
+- [`documentation/OPERATIONS.md`](documentation/OPERATIONS.md) - post-deploy, admin commands, permissions, and troubleshooting
 
 create prodgit alias
 ```bash
@@ -18,8 +23,16 @@ echo "alias prodgit='sudo git --git-dir=/root/cornell-tilde-prod.git --work-tree
 source ~/.bashrc
 ```
 
-pull changes from main branch with `prodgit pull origin main`
+pull changes from main branch with:
+```bash
+prodgit pull origin main
+sudo post-deploy
+```
 
-pull changes from development branch with `prodgit pull origin development`
+pull changes from development branch with:
+```bash
+prodgit pull origin development
+sudo post-deploy
+```
 
 check status of server to main with `prodgit status`

@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-import datetime as dt
+import json
 import re
-import secrets
+import subprocess
 import sys
 
 sys.path.insert(0, "/opt/cornell-tilde/lib")
 
-from cornell_tilde.db import get_connection
+from cornell_tilde.config import ADMIN_EMAIL, SITE_DOMAIN, SITE_URL
 
 EMAIL_REGEX = re.compile(r"^[A-Za-z0-9]+@cornell\.edu$")
 USERNAME_REGEX = re.compile(r"^[a-z][a-z0-9_-]{1,31}$")
 YEAR_REGEX = re.compile(r"^\d{4}$")
+SUBMIT_APPLICATION = "/opt/cornell-tilde/bin/submit_application.py"
 
 COLLEGES = [
     "Arts and Sciences (CAS)",
@@ -58,7 +59,7 @@ def ask_email() -> str:
             pause()
             continue
 
-        confirm = input(f"\nIs this correct?\n{email}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{email}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return email
@@ -84,7 +85,7 @@ def ask_name() -> str:
             pause()
             continue
 
-        confirm = input(f"\nIs this correct?\n{name}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{name}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return name
@@ -104,10 +105,10 @@ def ask_username() -> str:
         print("This will be used for SSH and your public page.")
         print()
         print("Example:")
-        print("  ssh yourusername@cornelltilde.com")
-        print("  https://cornelltilde.com/~yourusername")
+        print(f"  ssh yourusername@{SITE_DOMAIN}")
+        print(f"  {SITE_URL}/~yourusername")
         print()
-        print("Rules: 2-32 characters, lowercase letters, numbers, or _")
+        print("Rules: 2-32 characters, lowercase letters, numbers, -, or _")
         print("Must start with a lowercase letter.")
         print()
 
@@ -118,7 +119,7 @@ def ask_username() -> str:
             pause()
             continue
 
-        confirm = input(f"\nIs this correct?\n{username}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{username}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return username
@@ -157,7 +158,7 @@ def ask_college() -> str:
 
         college = COLLEGES[index - 1]
 
-        confirm = input(f"\nIs this correct?\n{college}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{college}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return college
@@ -166,8 +167,6 @@ def ask_college() -> str:
         pause()
 
 def ask_grad_year() -> str:
-    current_year = dt.datetime.now(dt.timezone.utc).year
-
     while True:
         clear_screen()
         print("=" * 60)
@@ -186,14 +185,7 @@ def ask_grad_year() -> str:
             pause()
             continue
 
-        year_int = int(grad_year)
-
-        if year_int < current_year or year_int > current_year + 10:
-            print("\nPlease enter a realistic graduation year.")
-            pause()
-            continue
-
-        confirm = input(f"\nIs this correct?\n{grad_year}\n\n(yes/no): ").strip().lower()
+        confirm = input(f"\nIs this correct?\n{grad_year}\n\n(yes/No): ").strip().lower()
 
         if confirm in ("y", "yes"):
             return grad_year
@@ -218,7 +210,7 @@ def ask_info() -> str:
         if not info:
             confirm = input(
                 "\nYou did not enter any additional information.\n"
-                "Are you sure you want to leave this blank? (yes/no): "
+                "Are you sure you want to leave this blank? (yes/No): "
             ).strip().lower()
 
             if confirm in ("y", "yes"):
@@ -229,7 +221,7 @@ def ask_info() -> str:
             continue
 
         confirm = input(
-            f"\nIs this correct?\n\n{info}\n\n(yes/no): "
+            f"\nIs this correct?\n\n{info}\n\n(yes/No): "
         ).strip().lower()
 
         if confirm in ("y", "yes"):
@@ -253,7 +245,7 @@ def ask_ssh_key() -> str:
         print("ssh-ed25519 AAAAC3... your_netid@cornell.edu")
         print()
         print("Need help?")
-        print("https://cornelltilde.com/ssh/")
+        print(f"{SITE_URL}/ssh/")
         print()
 
         key1 = input("SSH Public Key: ").strip()
@@ -286,41 +278,26 @@ def ask_ssh_key() -> str:
 
         return key1
 
-def generate_application_id() -> str:
-    year = dt.datetime.now(dt.timezone.utc).year % 100
-    alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
-    suffix = ''.join(secrets.choice(alphabet) for _ in range(6))
-    return f"CT-{year}-{suffix}"
+def submit_application(record: dict) -> str:
+    payload = json.dumps(record, separators=(",", ":"))
 
-def write_application(record: dict) -> None:
-    with get_connection() as conn:
-        conn.execute("""
-            INSERT INTO applications (
-                application_id,
-                submitted_at,
-                email,
-                name,
-                preferred_username,
-                final_username,
-                college,
-                graduation_year,
-                additional_info,
-                ssh_key,
-                status,
-                updated_at
-            )
-            VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
-        """, (
-            record["application_id"],
-            record["submitted_at"],
-            record["email"],
-            record["name"],
-            record["preferred_username"],
-            record["college"],
-            record["graduation_year"],
-            record["additional_info"],
-            record["ssh_key"],
-        ))
+    result = subprocess.run(
+        ["sudo", SUBMIT_APPLICATION],
+        input=payload,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or "application submit helper failed")
+
+    application_id = result.stdout.strip()
+
+    if not application_id:
+        raise RuntimeError("application submit helper did not return an application id")
+
+    return application_id
 
 def show_intro():
     clear_screen()
@@ -331,7 +308,7 @@ def show_intro():
     print("This form is used to request access to tilde@Cornell.")
     print()
     print("For help, contact the admin at:")
-    print("admin@cornelltilde.com")
+    print(ADMIN_EMAIL)
     print()
     print("By using this service, you agree to follow:")
     print("- Cornell IT policies")
@@ -345,7 +322,6 @@ def review_application(data: dict) -> bool:
         clear_screen()
         print("Review Your Application")
         print("=" * 60)
-        print(f"Application ID:         {data['application_id']}")
         print(f"Email:                  {data['email']}")
         print(f"Name:                   {data['name']}")
         print(f"Requested Username:     {data['preferred_username']}")
@@ -383,11 +359,7 @@ def main() -> int:
         add_info = ask_info()
         ssh_key = ask_ssh_key()
 
-        application_id = generate_application_id()
-
         data = {
-            "application_id": application_id,
-            "submitted_at": dt.datetime.now(dt.timezone.utc).isoformat(),
             "email": email,
             "name": name,
             "preferred_username": username,
@@ -402,7 +374,7 @@ def main() -> int:
             print("Application canceled. No request was submitted.")
             return 1
 
-        write_application(data)
+        application_id = submit_application(data)
 
     except (EOFError, KeyboardInterrupt):
         leave_screen()
@@ -411,7 +383,7 @@ def main() -> int:
     except Exception:
         leave_screen()
         print("There was an error submitting your application.")
-        print("Please contact the site admin at admin@cornelltilde.com.")
+        print(f"Please contact the site admin at {ADMIN_EMAIL}.")
         return 1
     finally:
         leave_screen()
@@ -421,7 +393,7 @@ def main() -> int:
     print(f"Application ID: {application_id}")
     print()
     print("Thanks! We will review your request and contact you by email.")
-    print("For help, contact admin@cornelltilde.com.")
+    print(f"For help, contact {ADMIN_EMAIL}.")
     print()
     return 0
 

@@ -27,11 +27,16 @@
   <p>
     tilde@Cornell currently has <strong>{member_count}</strong> {member_label}.
     Each member has shell access and a personal page under
-    <strong>https://cornelltilde.com/~username</strong>.
+    <strong>{site_url}/~username</strong>.
   </p>
+{page_count_line}
 </div>
 
+{pagination}
+
 {cards}
+
+{pagination}
 
 <footer>
   tilde@Cornell is a student-run project and is not an official Cornell University service.
@@ -39,7 +44,7 @@
 
 <div class="floating-join">
   <span>Want your own page?</span>
-  <strong>ssh join@cornelltilde.com</strong>
+  <strong>ssh join@{site_domain}</strong>
   <span>Password: GO BIG RED</span>
 </div>
 
