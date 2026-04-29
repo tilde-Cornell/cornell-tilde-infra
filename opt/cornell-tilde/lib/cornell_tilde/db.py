@@ -18,7 +18,7 @@ def get_connection() -> sqlite3.Connection:
     return conn
 
 def run_sql_file(conn: sqlite3.Connection, path: Path) -> None:
-    conn.executescript(path.read_text())
+    conn.executescript(path.read_text(encoding="utf-8"))
 
 def init_db() -> None:
     with get_connection() as conn:
