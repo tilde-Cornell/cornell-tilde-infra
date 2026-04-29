@@ -33,7 +33,6 @@ sudo apt install -y \
   acl \
   sqlite3 \
   python3 \
-  python3-dotenv \
   apache2 \
   openssh-server \
   fail2ban \
