@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import os
 import pwd
 import re
@@ -6,8 +6,6 @@ import subprocess
 import sys
 import html
 from pathlib import Path
-
-sys.path.insert(0, "/opt/cornell-tilde/lib")
 
 from cornell_tilde.config import (
     SITE_DOMAIN,

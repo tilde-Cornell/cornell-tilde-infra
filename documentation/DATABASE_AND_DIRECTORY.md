@@ -23,91 +23,70 @@ Storage/API note: SQLite stores `permissions_json` and `tilde_compute_json` as J
 Function summary:
 
 - `get_connection()`: no arguments.
-- Returns: `sqlite3.Connection`.
-
+  - Returns: `sqlite3.Connection`.
 
 - `run_sql_file(conn: sqlite3.Connection, path: Path)`: takes an open SQLite connection and a SQL file path.
 
-
 - `init_db()`: no arguments; creates/updates the expected schema.
 
-
 - `get_user(username: str)`: gets one user.
-- Returns: `dict` with user fields, or no result when missing.
-- Dict fields: `username`: str, `name`: str, `email`: str, `college`: str, `grad_year`: str, `bio`: str, `public`: int, `is_admin`: int, `permissions`: dict, `tilde_compute`: dict, `created_at`: str, `updated_at`: str.
-
+  - Returns: `dict` with user fields, or no result when missing.
+  - Dict fields: `username`: str, `name`: str, `email`: str, `college`: str, `grad_year`: str, `bio`: str, `public`: int, `is_admin`: int, `permissions`: dict, `tilde_compute`: dict, `created_at`: str, `updated_at`: str.
 
 - `get_public_users()`: gets visible directory users.
-- Returns: `list[dict]`.
-- Dict fields: `username`: str, `name`: str, `email`: str, `college`: str, `grad_year`: str, `bio`: str, `is_admin`: int, `permissions`: dict, `tilde_compute`: dict.
-
+  - Returns: `list[dict]`.
+  - Dict fields: `username`: str, `name`: str, `email`: str, `college`: str, `grad_year`: str, `bio`: str, `is_admin`: int, `permissions`: dict, `tilde_compute`: dict.
 
 - `get_all_users()`: gets all directory users.
-- Returns: `list[dict]`.
-- Dict fields: `username`: str, `name`: str, `email`: str, `college`: str, `grad_year`: str, `bio`: str, `public`: int, `is_admin`: int, `permissions`: dict, `tilde_compute`: dict, `created_at`: str, `updated_at`: str.
-
+  - Returns: `list[dict]`.
+  - Dict fields: `username`: str, `name`: str, `email`: str, `college`: str, `grad_year`: str, `bio`: str, `public`: int, `is_admin`: int, `permissions`: dict, `tilde_compute`: dict, `created_at`: str, `updated_at`: str.
 
 - `get_admin_users()`: gets users where `is_admin` is true.
-- Returns: `list[dict]`.
-- Dict fields: `username`: str, `name`: str, `email`: str, `college`: str, `grad_year`: str, `bio`: str, `public`: int, `is_admin`: int, `permissions`: dict, `tilde_compute`: dict, `created_at`: str, `updated_at`: str.
-
+  - Returns: `list[dict]`.
+  - Dict fields: `username`: str, `name`: str, `email`: str, `college`: str, `grad_year`: str, `bio`: str, `public`: int, `is_admin`: int, `permissions`: dict, `tilde_compute`: dict, `created_at`: str, `updated_at`: str.
 
 - `add_user_to_directory(username: str, name: str, email: str = optional, college: str = optional, grad_year: str = optional, bio: str = optional, public: bool = True, is_admin: bool = False, permissions: dict = {}, tilde_compute: dict = {})`: adds a user to the database;
-- raises `ValueError` if that username already exists.
-- `permissions` and `tilde_compute` are Python dicts; they are saved internally as JSON text. If omitted, they save as `{}`. If `bio` is omitted, it saves as an empty string.
-
+  - raises `ValueError` if that username already exists.
+  - `permissions` and `tilde_compute` are Python dicts; they are saved internally as JSON text. If omitted, they save as `{}`. If `bio` is omitted, it saves as an empty string.
 
 - `update_user_profile(username: str, name: str = optional, email: str = optional, college: str = optional, grad_year: str = optional, bio: str = optional, public: bool = optional, is_admin: bool = optional)`: updates only the fields provided.
-- Example: `update_user_profile(username="aquoria", bio="new bio", public=True)` updates only `bio` and `public`; keyword arguments can be passed in any order.
-
+  - Example: `update_user_profile(username="aquoria", bio="new bio", public=True)` updates only `bio` and `public`; keyword arguments can be passed in any order.
 
 - `get_user_permissions(username: str)`: reads permissions as a Python dict.
-- Returns: `dict`, formatted as service name to access boolean, such as `{"mail": True, "forgejo": False}`.
-- Storage: saved in SQLite as `permissions_json` JSON text.
-
+  - Returns: `dict`, formatted as service name to access boolean, such as `{"mail": True, "forgejo": False}`.
+  - Storage: saved in SQLite as `permissions_json` JSON text.
 
 - `set_user_permissions(username: str, permissions: dict)`: accepts a Python dict and saves it as JSON text.
 
-
 - `get_user_tilde_compute(username: str)`: reads tilde compute data as a Python dict.
-- Returns: `dict`. Storage: saved in SQLite as `tilde_compute_json` JSON text. The exact structure is TBD.
-
+  - Returns: `dict`. Storage: saved in SQLite as `tilde_compute_json` JSON text. The exact structure is TBD.
 
 - `set_user_tilde_compute(username: str, tilde_compute: dict)`: accepts a Python dict and saves it as JSON text.
 
-
 - `set_user_public(username: str, public: bool)`: sets directory visibility.
 
-
 - `get_user_admin(username: str)`: reads admin status.
-- Returns: `bool`.
-
+  - Returns: `bool`.
 
 - `set_user_admin(username: str, is_admin: bool)`: sets admin status.
 
-
 - `promote_user_to_admin(username: str)` / `demote_user_from_admin(username: str)`: convenience wrappers for admin status.
-
 
 - `set_user_bio(username: str, new_bio: str)`: updates only `bio`.
 
-
 - `hide_user(username: str)` / `show_user(username: str)`: convenience wrappers for visibility.
-- hide sets `public` to `False`, show sets public to `True`.
-
+  - hide sets `public` to `False`, show sets public to `True`.
 
 - `delete_user(username: str)`: removes the user from the directory table only.
-- it does not delete the Unix account.
-TODO: make it fully wipe the account
-
+  - it does not delete the Unix account.
+  - TODO: make it fully wipe the account
 
 - `get_pending_applications()`: gets pending applications.
-- Returns: `list[dict]`.
-- Dict fields: `application_id`: str, `submitted_at`: str, `email`: str, `name`: str, `preferred_username`: str, `final_username`: str, `college`: str, `graduation_year`: str, `additional_info`: str, `ssh_key`: str, `status`: str, `updated_at`: str. `final_username` is only set after approval.
-
+  - Returns: `list[dict]`.
+  - Dict fields: `application_id`: str, `submitted_at`: str, `email`: str, `name`: str, `preferred_username`: str, `final_username`: str, `college`: str, `graduation_year`: str, `additional_info`: str, `ssh_key`: str, `status`: str, `updated_at`: str. `final_username` is only set after approval.
 
 - `set_application_status(application_id: str, status: str, final_username: str = optional)`
-- sets application status; status must be `pending`, `approved`, or `rejected`.
+  - sets application status; status must be `pending`, `approved`, or `rejected`.
 
 ## Tables
 
