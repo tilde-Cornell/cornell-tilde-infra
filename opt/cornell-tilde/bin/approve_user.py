@@ -3,6 +3,7 @@ import os
 import pwd
 import re
 import subprocess
+import sys
 import html
 from pathlib import Path
 
