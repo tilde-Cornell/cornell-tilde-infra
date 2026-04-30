@@ -12,7 +12,6 @@ mkdir -p \
   "$PROJECT_ROOT/bin" \
   "$PROJECT_ROOT/lib" \
   "$PROJECT_ROOT/migrations" \
-  "$PROJECT_ROOT/systemd" \
   "$PROJECT_ROOT/templates" \
   "$PROJECT_ROOT/var" \
   "$WEB_ROOT"
@@ -33,7 +32,7 @@ section "Permissions"
 chown -R root:root "$PROJECT_ROOT"
 
 chmod 755 "$PROJECT_ROOT"
-chmod 750 "$PROJECT_ROOT/bin" "$PROJECT_ROOT/lib" "$PROJECT_ROOT/migrations" "$PROJECT_ROOT/systemd" "$PROJECT_ROOT/templates"
+chmod 750 "$PROJECT_ROOT/bin" "$PROJECT_ROOT/lib" "$PROJECT_ROOT/migrations" "$PROJECT_ROOT/templates"
 
 if [ -d "$PROJECT_ROOT/lib/cornell_tilde" ]; then
   chmod 750 "$PROJECT_ROOT/lib/cornell_tilde"
@@ -45,10 +44,10 @@ chmod 750 \
   "$PROJECT_ROOT/bin/generate_directory.py" \
   "$PROJECT_ROOT/bin/join_script.py" \
   "$PROJECT_ROOT/bin/submit_application.py" \
-  "$PROJECT_ROOT/bin/rebuild_directory_when_modified.sh"
+  "$PROJECT_ROOT/bin/rebuild_directory_when_modified.sh" \
+  "$PROJECT_ROOT/bin/watch_directory_changes.sh"
 
 chmod 640 "$PROJECT_ROOT"/migrations/*.sql
-chmod 644 "$PROJECT_ROOT"/systemd/*.service "$PROJECT_ROOT"/systemd/*.path
 
 chown root:cornelltilde-db "$PROJECT_ROOT/var" "$DB_PATH"
 chmod 770 "$PROJECT_ROOT/var"
@@ -94,7 +93,7 @@ chown -R root:root "$WEB_ROOT"
 find "$WEB_ROOT" -type d -exec chmod 755 {} \;
 find "$WEB_ROOT" -type f -exec chmod 644 {} \;
 
-section "Command and systemd links"
+section "Command links"
 
 chmod 755 /deploy/apply-runtime.sh /deploy/configure-ssh.sh /deploy/post-deploy.sh /deploy/common.sh
 
@@ -105,18 +104,29 @@ ln -sf "$PROJECT_ROOT/bin/join_script_wrapper.sh" /usr/local/sbin/join_script_wr
 ln -sf "$PROJECT_ROOT/bin/submit_application.py" /usr/local/sbin/submit_application.py
 ln -sf "$PROJECT_ROOT/bin/tilde-admin.sh" /usr/local/sbin/tilde-admin
 ln -sf "$PROJECT_ROOT/bin/rebuild_directory_when_modified.sh" /usr/local/sbin/rebuild_directory_when_modified.sh
+ln -sf "$PROJECT_ROOT/bin/watch_directory_changes.sh" /usr/local/sbin/watch_directory_changes
 ln -sf /deploy/apply-runtime.sh /usr/local/sbin/apply-runtime
 ln -sf /deploy/configure-ssh.sh /usr/local/sbin/configure-ssh
 ln -sf /deploy/post-deploy.sh /usr/local/sbin/post-deploy
-ln -sf "$PROJECT_ROOT/systemd/cornell-tilde-directory.service" /etc/systemd/system/cornell-tilde-directory.service
-ln -sf "$PROJECT_ROOT/systemd/cornell-tilde-directory.path" /etc/systemd/system/cornell-tilde-directory.path
 
 section "Directory rebuild watcher"
 
-systemctl daemon-reload
-systemctl reset-failed cornell-tilde-directory.service || true
-systemctl enable --now cornell-tilde-directory.path
+# Stop any existing watcher process before (re)starting.
+if [ -f /run/cornell-tilde-directory-watcher.pid ]; then
+  old_pid="$(cat /run/cornell-tilde-directory-watcher.pid)"
+  if kill -0 "$old_pid" 2>/dev/null; then
+    kill "$old_pid" 2>/dev/null || true
+    sleep 1
+  fi
+  rm -f /run/cornell-tilde-directory-watcher.pid
+fi
 
+# Start the inotifywait-based watcher daemon.
+nohup "$PROJECT_ROOT/bin/watch_directory_changes.sh" >> /var/log/cornell-tilde-directory.log 2>&1 &
+disown
+sleep 1
+
+# Trigger an immediate directory rebuild now that the deploy is complete.
 sqlite3 "$DB_PATH" "
   UPDATE directory_modified
   SET modified = 1,
@@ -124,8 +134,7 @@ sqlite3 "$DB_PATH" "
   WHERE id = 1;
 "
 
-systemctl reset-failed cornell-tilde-directory.service || true
-systemctl start cornell-tilde-directory.service
+"$PROJECT_ROOT/bin/rebuild_directory_when_modified.sh"
 
 section "Runtime verification"
 
@@ -137,4 +146,9 @@ PYTHONPATH="$PROJECT_ROOT/lib" python3 -c "from cornell_tilde.db import get_conn
 
 sqlite3 "$DB_PATH" ".tables"
 sqlite3 "$DB_PATH" "SELECT * FROM directory_modified;"
-systemctl status cornell-tilde-directory.path --no-pager
+
+if [ -f /run/cornell-tilde-directory-watcher.pid ] && kill -0 "$(cat /run/cornell-tilde-directory-watcher.pid)" 2>/dev/null; then
+  echo "Directory watcher is running (PID $(cat /run/cornell-tilde-directory-watcher.pid))."
+else
+  echo "WARNING: Directory watcher is not running."
+fi

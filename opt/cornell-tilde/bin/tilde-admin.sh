@@ -47,27 +47,35 @@ check_service() {
   echo
 }
 
-check_path_unit() {
-  local unit="$1"
+check_directory_watcher() {
+  local pid_file="/run/cornell-tilde-directory-watcher.pid"
 
-  echo "--- $unit ---"
+  echo "--- Directory Change Watcher ---"
 
-  if systemctl is-active --quiet "$unit"; then
-    echo "$unit is active."
-  else
-    echo "$unit is NOT active. Starting..."
-    if systemctl start "$unit" && systemctl is-active --quiet "$unit"; then
-      echo "$unit started successfully."
-    else
-      echo "ERROR: $unit failed to start."
-    fi
+  if [ ! -f "$pid_file" ]; then
+    echo "Directory watcher is NOT running (no PID file). Starting..."
+    nohup "$PROJECT_ROOT/bin/watch_directory_changes.sh" >> /var/log/cornell-tilde-directory.log 2>&1 &
+    disown
+    sleep 1
   fi
 
-  if systemctl is-enabled --quiet "$unit"; then
-    echo "$unit is enabled on boot."
-  else
-    echo "$unit is NOT enabled on boot. Enabling..."
-    systemctl enable "$unit" || echo "ERROR: could not enable $unit."
+  if [ -f "$pid_file" ]; then
+    local pid
+    pid="$(cat "$pid_file")"
+    if kill -0 "$pid" 2>/dev/null; then
+      echo "Directory watcher is running (PID $pid)."
+    else
+      echo "Directory watcher PID file is stale. Restarting..."
+      rm -f "$pid_file"
+      nohup "$PROJECT_ROOT/bin/watch_directory_changes.sh" >> /var/log/cornell-tilde-directory.log 2>&1 &
+      disown
+      sleep 1
+      if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+        echo "Directory watcher restarted (PID $(cat "$pid_file"))."
+      else
+        echo "ERROR: could not start directory watcher."
+      fi
+    fi
   fi
 
   echo
@@ -145,13 +153,13 @@ check_directory_generation() {
     modified="$(sqlite3 "$DB_PATH" "SELECT modified FROM directory_modified WHERE id = 1;" 2>/dev/null || echo unknown)"
 
     if [ "$modified" = "1" ]; then
-      echo "Directory has pending changes. Starting rebuild service..."
+      echo "Directory has pending changes. Running rebuild..."
 
-      if systemctl start cornell-tilde-directory.service; then
+      if "$PROJECT_ROOT/bin/rebuild_directory_when_modified.sh"; then
         modified="$(sqlite3 "$DB_PATH" "SELECT modified FROM directory_modified WHERE id = 1;" 2>/dev/null || echo unknown)"
         echo "Directory modified flag after rebuild: $modified"
       else
-        echo "ERROR: directory rebuild service failed."
+        echo "ERROR: directory rebuild failed."
       fi
     elif [ "$modified" = "0" ]; then
       echo "Directory modified flag is clear."
@@ -231,11 +239,10 @@ check_tool_links() {
     "/usr/local/sbin/submit_application.py"
     "/usr/local/sbin/tilde-admin"
     "/usr/local/sbin/rebuild_directory_when_modified.sh"
+    "/usr/local/sbin/watch_directory_changes"
     "/usr/local/sbin/apply-runtime"
     "/usr/local/sbin/configure-ssh"
     "/usr/local/sbin/post-deploy"
-    "/etc/systemd/system/cornell-tilde-directory.service"
-    "/etc/systemd/system/cornell-tilde-directory.path"
   )
 
   local path
@@ -324,7 +331,7 @@ main() {
   check_service apache2
   check_service fail2ban
   check_service unattended-upgrades
-  check_path_unit cornell-tilde-directory.path
+  check_directory_watcher
 
   check_firewall
   check_fail2ban

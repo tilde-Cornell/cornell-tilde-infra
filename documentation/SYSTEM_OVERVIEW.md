@@ -12,7 +12,6 @@ The intended production checkout model is unusual but deliberate: the Git worktr
 - `/opt/cornell-tilde/bin`: operational tools and application/account scripts.
 - `/opt/cornell-tilde/lib/cornell_tilde`: shared Python configuration and database helpers.
 - `/opt/cornell-tilde/migrations`: SQLite schema setup files and migrations.
-- `/opt/cornell-tilde/systemd`: systemd units for rebuilding the public directory.
 - `/opt/cornell-tilde/templates`: HTML templates for generated member pages.
 - `/opt/cornell-tilde/var/cornell_tilde.sqlite3`: live SQLite database, not stored in Git.
 - `/var/www/html`: Apache document root and public static site.
@@ -24,7 +23,7 @@ Apache serves the public site from `/var/www/html` and member pages through `mod
 
 The application flow stores pending applications in SQLite. An admin runs `approve_user.py` to review applications, create Unix accounts, write SSH authorized keys, generate starter webpages, and add approved users to the public directory table.
 
-Directory pages are static HTML generated from the `users` table. SQLite triggers set a `directory_modified` flag when relevant user rows change. A systemd path unit watches the database file and starts a oneshot service that regenerates the directory when the flag is set.
+Directory pages are static HTML generated from the `users` table. SQLite triggers set a `directory_modified` flag when relevant user rows change. An `inotifywait`-based watcher daemon (`watch_directory_changes.sh`) monitors the database directory and runs `rebuild_directory_when_modified.sh` whenever a change is detected. This approach works in Docker and other environments that do not have systemd.
 
 ## Security Boundary
 
@@ -37,6 +36,6 @@ The public `join` account should not have direct database group access. The inte
 
 ## Operational Model
 
-Initial setup is handled by `/deploy/setup.sh`. Routine updates should be handled by pulling the selected branch into the root worktree and then running `sudo post-deploy`. The post-deploy path reapplies runtime permissions, recreates symlinks, reruns database initialization/migrations, reloads systemd state, and verifies basic service health.
+Initial setup is handled by `/deploy/setup.sh`. Routine updates should be handled by pulling the selected branch into the root worktree and then running `sudo post-deploy`. The post-deploy path reapplies runtime permissions, recreates symlinks, reruns database initialization/migrations, restarts the directory watcher daemon, and verifies basic service health.
 
 This split matters because Git only updates files. It does not automatically restore file ownership, ACLs, service links, database schema changes, or systemd state.

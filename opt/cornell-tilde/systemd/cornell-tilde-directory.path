@@ -1,9 +1,0 @@
-[Unit]
-Description=Watch Cornell Tilde database for relevant directory modifications
-
-[Path]
-PathChanged=/opt/cornell-tilde/var/cornell_tilde.sqlite3
-Unit=cornell-tilde-directory.service
-
-[Install]
-WantedBy=multi-user.target

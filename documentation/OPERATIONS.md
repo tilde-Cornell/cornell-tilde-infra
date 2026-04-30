@@ -28,9 +28,9 @@ sudo post-deploy
 - Restricted `join` account access.
 - Sudoers rule for application submission.
 - Admin command symlinks in `/usr/local/sbin`.
-- systemd service/path symlinks and daemon reload.
+- Directory watcher daemon startup.
 - Directory rebuild trigger.
-- Basic Apache, SSH, sudoers, database, and systemd verification.
+- Basic Apache, SSH, sudoers, database, and watcher verification.
 
 ## Fresh Setup
 
@@ -60,20 +60,20 @@ sudo approve_user.py
 Force a directory rebuild:
 
 ```bash
-sudo systemctl reset-failed cornell-tilde-directory.service
-sudo systemctl start cornell-tilde-directory.service
+sudo rebuild_directory_when_modified.sh
 ```
 
 Check the directory watcher:
 
 ```bash
-systemctl status cornell-tilde-directory.path --no-pager
+cat /run/cornell-tilde-directory-watcher.pid
+kill -0 "$(cat /run/cornell-tilde-directory-watcher.pid)"
 ```
 
 Check recent directory rebuild logs:
 
 ```bash
-journalctl -u cornell-tilde-directory.service --no-pager -n 80
+sudo tail -n 80 /var/log/cornell-tilde-directory.log
 ```
 
 Check SSH config validity before restarting SSH:
@@ -118,11 +118,10 @@ If `sudo post-deploy` is missing, run the deploy script by absolute path once to
 sudo bash /deploy/apply-runtime.sh
 ```
 
-If the directory service reports `start-limit-hit`, reset it and start it once:
+If the directory watcher is not running, restart it:
 
 ```bash
-sudo systemctl reset-failed cornell-tilde-directory.service
-sudo systemctl start cornell-tilde-directory.service
+sudo watch_directory_changes >> /var/log/cornell-tilde-directory.log 2>&1 &
 ```
 
 If `prodgit pull` refuses because a local file changed, inspect the file before overwriting anything:

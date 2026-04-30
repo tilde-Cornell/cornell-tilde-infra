@@ -40,7 +40,8 @@ sudo apt install -y \
   ufw \
   certbot \
   python3-certbot-apache \
-  unattended-upgrades
+  unattended-upgrades \
+  inotify-tools
 
 echo
 echo "=== Enabling services ==="
@@ -63,7 +64,6 @@ echo "=== Creating directories ==="
 sudo mkdir -p /opt/cornell-tilde/bin
 sudo mkdir -p /opt/cornell-tilde/lib
 sudo mkdir -p /opt/cornell-tilde/migrations
-sudo mkdir -p /opt/cornell-tilde/systemd
 sudo mkdir -p /opt/cornell-tilde/templates
 sudo mkdir -p /opt/cornell-tilde/var
 sudo mkdir -p /var/www/html
