@@ -29,7 +29,10 @@ TEST_USER="testuser"
 TEST_EMAIL="testuser@cornell.edu"
 TEST_NAME="Test User"
 TEST_YEAR="2027"
-COLLEGE_NUM="2"   # "Engineering (COE)" is item 2 in join_script.py's COLLEGES list
+# "Engineering (COE)" is the second entry (1-indexed) in the COLLEGES list
+# defined in opt/cornell-tilde/bin/join_script.py.  If that list changes,
+# this number must be updated to match.
+COLLEGE_NUM="2"
 
 TMPDIR_TEST="$(mktemp -d)"
 PASS=0
@@ -136,7 +139,17 @@ for i in $(seq 1 60); do
     [ "$i" -eq 60 ] && { echo "ERROR: SSH not ready after 60 s"; exit 1; }
 done
 log "SSH port open"
-sleep 2   # let sshd finish its own initialisation
+
+log "Waiting for SSH daemon to be fully ready ..."
+for i in $(seq 1 30); do
+    # Check for the SSH protocol banner, which means sshd is accepting connections.
+    if echo "" | nc -w 2 localhost "$SSH_PORT" 2>/dev/null | grep -q 'SSH'; then
+        log "SSH daemon ready after ${i}s"
+        break
+    fi
+    sleep 1
+    [ "$i" -eq 30 ] && log "Warning: SSH readiness check timed out, proceeding anyway"
+done
 
 # =============================================================================
 section "TEST 1: Server files and services"

@@ -12,6 +12,8 @@ jobs:
     name: Build and test Docker image
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout repository
@@ -36,4 +38,6 @@ jobs:
 
       - name: Dump container logs on failure
         if: failure()
-        run: docker logs cornell-tilde-ci-* 2>/dev/null || true
+        run: |
+          docker ps -a --filter "ancestor=cornell-tilde:ci" --format '{{.Names}}' \
+            | xargs -r docker logs 2>&1 || true
