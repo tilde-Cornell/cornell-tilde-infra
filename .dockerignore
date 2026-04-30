@@ -1,0 +1,24 @@
+# Exclude secrets and runtime state
+.env
+*.sqlite3
+*.db
+*.bak
+*.tar.gz
+*.key
+*.pem
+*.crt
+id_*
+
+# Exclude Python cache
+__pycache__/
+*.pyc
+*.egg-info/
+.venv/
+
+# Exclude generated/runtime output
+opt/cornell-tilde/var/*
+var/www/html/directory/
+
+# Exclude version control and docs
+.git/
+documentation/

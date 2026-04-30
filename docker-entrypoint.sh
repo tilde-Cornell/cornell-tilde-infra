@@ -1,0 +1,40 @@
+#!/bin/bash
+set -euo pipefail
+
+# Write .env from environment variables so cornell_tilde.config picks them up
+{
+    echo "SITE_DOMAIN=${SITE_DOMAIN:-cornelltilde.com}"
+    echo "ADMIN_EMAIL=${ADMIN_EMAIL:-admin@cornelltilde.com}"
+} > /opt/cornell-tilde/.env
+
+# Set the join user password if one was supplied
+if [ -n "${JOIN_PASSWORD:-}" ]; then
+    echo "join:${JOIN_PASSWORD}" | chpasswd
+fi
+
+# Keep Apache's ServerName in sync with the configured domain
+sed -i "s/^ServerName .*/ServerName ${SITE_DOMAIN:-cornelltilde.com}/" \
+    /etc/apache2/conf-available/servername.conf
+
+# Attempt to apply ACLs for the join user so it can only reach the files it
+# needs (bin, lib) and cannot touch the database.  overlayfs does not support
+# ACLs, so failures here are non-fatal.
+setfacl -m u:join:--x /opt/cornell-tilde \
+    && setfacl -m u:join:r-x /opt/cornell-tilde/bin \
+    && setfacl -m u:join:r-x /opt/cornell-tilde/bin/join_script.py \
+    && setfacl -m u:join:r-x /opt/cornell-tilde/bin/join_script_wrapper.sh \
+    && setfacl -m u:join:r-x /opt/cornell-tilde/bin/submit_application.py \
+    && setfacl -m u:join:r-x /opt/cornell-tilde/lib \
+    && setfacl -m u:join:r-x /opt/cornell-tilde/lib/cornell_tilde \
+    && setfacl -m u:join:r-- /opt/cornell-tilde/lib/cornell_tilde/*.py \
+    || echo "Warning: ACL setup skipped (filesystem may not support ACLs)"
+
+# Pre-generate the user directory page
+PYTHONPATH=/opt/cornell-tilde/lib \
+    python3 /opt/cornell-tilde/bin/generate_directory.py || true
+
+# Start Apache in the background
+apachectl start
+
+# Start the SSH daemon in the foreground as PID 1
+exec /usr/sbin/sshd -D
