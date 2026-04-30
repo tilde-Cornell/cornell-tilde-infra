@@ -1,0 +1,39 @@
+name: Docker Integration Tests
+
+on:
+  push:
+    branches:
+      - main
+      - development
+  pull_request:
+
+jobs:
+  integration-test:
+    name: Build and test Docker image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            sshpass \
+            netcat-openbsd \
+            sqlite3
+
+      - name: Build Docker image
+        run: docker build -t cornell-tilde:ci .
+
+      - name: Run integration tests
+        run: bash tests/ci_integration.sh cornell-tilde:ci
+        env:
+          CI_SSH_PORT: "2222"
+          CI_HTTP_PORT: "8080"
+
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker logs cornell-tilde-ci-* 2>/dev/null || true
