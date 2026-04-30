@@ -40,7 +40,7 @@ DATABASE_PATH = VAR_DIR / "cornell_tilde.sqlite3"
 DIRECTORY_TEMPLATE = TEMPLATE_DIR / "directory.html"
 USER_HOMEPAGE_TEMPLATE = TEMPLATE_DIR / "user_homepage.html"
 
-WEB_ROOT = Path("/var/www/html")
+WEB_ROOT = Path(os.getenv("WEB_ROOT", "/var/www/html"))
 DIRECTORY_OUTPUT = WEB_ROOT / "directory" / "index.html"
 
 GENERATE_DIRECTORY = BIN_DIR / "generate_directory.py"

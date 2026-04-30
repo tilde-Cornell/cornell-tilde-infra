@@ -1,10 +1,7 @@
-#!/usr/bin/env python3
-import sys
+#!/usr/bin/python3
 import html
 import math
 import shutil
-
-sys.path.insert(0, "/opt/cornell-tilde/lib")
 
 from cornell_tilde.config import DIRECTORY_TEMPLATE, DIRECTORY_OUTPUT, SITE_DOMAIN, SITE_URL
 from cornell_tilde.db import get_public_users

@@ -3,6 +3,7 @@
 PROJECT_ROOT="/opt/cornell-tilde"
 DB_PATH="$PROJECT_ROOT/var/cornell_tilde.sqlite3"
 WEB_ROOT="/var/www/html"
+PYTHON_BIN="/usr/bin/python3"
 
 deploy_script_dir() {
   local source="${BASH_SOURCE[1]}"

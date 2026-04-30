@@ -8,7 +8,7 @@ require_root
 
 section "SSH configuration"
 
-python3 - <<'PY'
+"$PYTHON_BIN" - <<'PY'
 from pathlib import Path
 import re
 

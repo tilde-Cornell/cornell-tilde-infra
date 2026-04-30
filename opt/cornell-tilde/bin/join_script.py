@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import json
 import re
 import subprocess
 import sys
-
-sys.path.insert(0, "/opt/cornell-tilde/lib")
 
 from cornell_tilde.config import ADMIN_EMAIL, SITE_DOMAIN, SITE_URL
 

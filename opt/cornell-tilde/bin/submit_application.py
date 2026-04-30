@@ -1,12 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import datetime as dt
 import json
 import re
 import secrets
 import sqlite3
 import sys
-
-sys.path.insert(0, "/opt/cornell-tilde/lib")
 
 from cornell_tilde.db import get_connection
 

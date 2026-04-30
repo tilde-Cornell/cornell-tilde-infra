@@ -3,6 +3,7 @@ set -euo pipefail
 
 source /deploy/common.sh
 SCRIPT_DIR="$(deploy_script_dir)"
+PYTHON_PATH_INSTALLER="$SCRIPT_DIR/../tools/install-python-path.py"
 
 require_root
 
@@ -26,8 +27,6 @@ chown root:cornelltilde-db "$PROJECT_ROOT/var" "$DB_PATH"
 chmod 770 "$PROJECT_ROOT/var"
 chmod 660 "$DB_PATH"
 
-PYTHONPATH="$PROJECT_ROOT/lib" python3 -c "from cornell_tilde.db import init_db; init_db()"
-
 section "Permissions"
 
 chown -R root:root "$PROJECT_ROOT"
@@ -39,7 +38,7 @@ if [ -d "$PROJECT_ROOT/lib/cornell_tilde" ]; then
   chmod 750 "$PROJECT_ROOT/lib/cornell_tilde"
 fi
 
-chmod 755 "$PROJECT_ROOT/bin/tilde-admin.sh" "$PROJECT_ROOT/bin/join_script_wrapper.sh"
+chmod 755 "$PROJECT_ROOT/bin/tilde-admin.sh" "$PROJECT_ROOT/bin/join_script_wrapper.sh" "$PYTHON_PATH_INSTALLER"
 chmod 750 \
   "$PROJECT_ROOT/bin/approve_user.py" \
   "$PROJECT_ROOT/bin/generate_directory.py" \
@@ -77,6 +76,12 @@ if id join >/dev/null 2>&1; then
 else
   echo "join user does not exist yet; skipping join ACLs."
 fi
+
+section "Python import path"
+
+"$PYTHON_BIN" "$PYTHON_PATH_INSTALLER" "$PROJECT_ROOT"
+
+"$PYTHON_BIN" -c "from cornell_tilde.db import init_db; init_db()"
 
 section "Join sudoers"
 
@@ -133,7 +138,7 @@ apache2ctl configtest
 sshd -t
 visudo -c
 
-PYTHONPATH="$PROJECT_ROOT/lib" python3 -c "from cornell_tilde.db import get_connection; print('db import works')"
+"$PYTHON_BIN" -c "from cornell_tilde.db import get_connection; print('db import works')"
 
 sqlite3 "$DB_PATH" ".tables"
 sqlite3 "$DB_PATH" "SELECT * FROM directory_modified;"
