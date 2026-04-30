@@ -26,4 +26,12 @@ Point your IDE at:
 For local runs, set:
   BASE_DIR=$repo_root/opt/cornell-tilde
   WEB_ROOT=$repo_root/var/www/html
+
+To run python commands in the terminal, run:
+  source $venv_path/bin/activate.csh on Csh
+  source $venv_path/bin/activate.fish on Fish
+  source $venv_path/bin/activate on all other shells
+
+To restore global python, run:
+  deactivate
 EOF
