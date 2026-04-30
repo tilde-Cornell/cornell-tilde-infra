@@ -123,7 +123,6 @@ fi
 
 # Start the inotifywait-based watcher daemon.
 nohup "$PROJECT_ROOT/bin/watch_directory_changes.sh" >> /var/log/cornell-tilde-directory.log 2>&1 &
-disown
 sleep 1
 
 # Trigger an immediate directory rebuild now that the deploy is complete.

@@ -38,4 +38,4 @@ The public `join` account should not have direct database group access. The inte
 
 Initial setup is handled by `/deploy/setup.sh`. Routine updates should be handled by pulling the selected branch into the root worktree and then running `sudo post-deploy`. The post-deploy path reapplies runtime permissions, recreates symlinks, reruns database initialization/migrations, restarts the directory watcher daemon, and verifies basic service health.
 
-This split matters because Git only updates files. It does not automatically restore file ownership, ACLs, service links, database schema changes, or systemd state.
+This split matters because Git only updates files. It does not automatically restore file ownership, ACLs, service links, database schema changes, or watcher daemon state.

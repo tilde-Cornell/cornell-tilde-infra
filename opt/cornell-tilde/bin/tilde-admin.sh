@@ -55,7 +55,6 @@ check_directory_watcher() {
   if [ ! -f "$pid_file" ]; then
     echo "Directory watcher is NOT running (no PID file). Starting..."
     nohup "$PROJECT_ROOT/bin/watch_directory_changes.sh" >> /var/log/cornell-tilde-directory.log 2>&1 &
-    disown
     sleep 1
   fi
 
@@ -68,7 +67,6 @@ check_directory_watcher() {
       echo "Directory watcher PID file is stale. Restarting..."
       rm -f "$pid_file"
       nohup "$PROJECT_ROOT/bin/watch_directory_changes.sh" >> /var/log/cornell-tilde-directory.log 2>&1 &
-      disown
       sleep 1
       if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
         echo "Directory watcher restarted (PID $(cat "$pid_file"))."
