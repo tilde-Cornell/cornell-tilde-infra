@@ -22,10 +22,10 @@ echo
 
 echo "=== Installing packages ==="
 
-sudo apt update
-sudo apt upgrade -y
+sudo apt-get update
+sudo apt-get upgrade -y
 
-sudo apt install -y \
+sudo apt-get install -y \
   sudo \
   curl \
   tree \
