@@ -2,8 +2,8 @@ services:
   tilde-server:
     build: .
     container_name: tilde-server
-    # volumes:
-    #   - user-data:/home
+    volumes:
+      - user-data:/home
     ports:
       - "2222:22"
       - "8080:80"
