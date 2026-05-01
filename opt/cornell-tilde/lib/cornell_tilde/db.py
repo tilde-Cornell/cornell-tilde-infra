@@ -4,9 +4,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from cornell_tilde.config import BASE_DIR, DATABASE_PATH
-
 MIGRATIONS_DIR = BASE_DIR / "migrations"
-
 DEFAULT_JSON = "{}"
 
 def get_connection() -> sqlite3.Connection:
@@ -63,6 +61,7 @@ WHERE tilde_compute_json IS NULL OR tilde_compute_json = ''
         """)
 
         run_sql_file(conn, MIGRATIONS_DIR / "2_directory_modified_hooks.sql")
+
 def _json_loads_or_empty(value: Optional[str]) -> dict[str, Any]:
     if not value:
         return {}
@@ -411,3 +410,5 @@ def set_application_status(
             final_username,
             application_id,
         ))
+
+get_connection()
