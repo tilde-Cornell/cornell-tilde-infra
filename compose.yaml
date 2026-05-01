@@ -1,0 +1,18 @@
+services:
+  tilde-server:
+    build: .
+    container_name: tilde-server
+    # volumes:
+    #   - user-data:/home
+    ports:
+      - "2222:22"
+      - "8080:80"
+    environment:
+      - JOIN_PASSWORD=""
+      - SERVER_DOMAIN=""
+      - ADMIN_EMAIL=""
+      - ROOT_PASSWORD=""
+      - container=podman
+
+volumes:
+  user-data:
