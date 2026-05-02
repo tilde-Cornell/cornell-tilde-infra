@@ -4,15 +4,19 @@ services:
     container_name: tilde-server
     volumes:
       - user-data:/home
+      - app-data:/opt/cornell-tilde/var
+      - system-state:/etc
     ports:
       - "2222:22"
       - "8080:80"
     environment:
-      - JOIN_PASSWORD=""
-      - SERVER_DOMAIN=""
-      - ADMIN_EMAIL=""
-      - ROOT_PASSWORD=""
+      - JOIN_PASSWORD="#CHANGE_ME#"
+      - SERVER_DOMAIN="#CHANGE_ME#"
+      - ADMIN_EMAIL="#CHANGE_ME#"
+      - ROOT_PASSWORD="#CHANGE_ME#"
       - container=podman
 
 volumes:
   user-data:
+  app-data:
+  system-state:

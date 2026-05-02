@@ -9,7 +9,7 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-if [[ ! -v CONTAINER ]]; then
+if [[ ! -v container ]]; then
   read -rsp "Password for join user: " JOIN_PASSWORD
   echo
   read -rp "Server domain (example: cornelltilde.com or dev.cornelltilde.com): " SERVER_DOMAIN
