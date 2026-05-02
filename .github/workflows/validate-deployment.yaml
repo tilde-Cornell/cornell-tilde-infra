@@ -13,16 +13,23 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Cache Container Layers
+      - name: Cache Podman Image
+        id: cache-podman-image
         uses: actions/cache@v5
         with:
-          path: ~/.local/share/containers/storage
+          path: /tmp/podman-cache
           key: ${{ runner.os }}-podman-${{ hashFiles('**/Containerfile') }}
-          restore-keys: |
+          restore-keys: |+
             ${{ runner.os }}-podman-${{ hashFiles('**/Containerfile') }}
             ${{ runner.os }}-podman-
+              
+      - name: Load Cached Image
+        if: steps.cache-podman-image.outputs.cache-hit == 'true'
+        run: |
+          podman load -i /tmp/podman-cache/tilde-cornell-dev.tar
 
-      - name: Build the Container image
+      - name: Build the Podman image
+        id: build-podman-image
         run: |
           podman build . \
             --tag tilde-cornell-dev \
@@ -31,3 +38,9 @@ jobs:
             --build-arg ADMIN_EMAIL="${{ vars.ADMIN_EMAIL }}" \
             --build-arg container="podman"\
             --build-arg ROOT_PASSWORD="${{ vars.ROOT_PASSWORD }}"
+
+      - name: Save Image to Cache
+        if: steps.build-podman-image.outcome == 'success'
+        run: |
+          mkdir -p /tmp/podman-cache
+          podman save --compress --format oci-archive -o /tmp/podman-cache/tilde-cornell-dev.tar tilde-cornell-dev
