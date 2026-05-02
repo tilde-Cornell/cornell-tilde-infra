@@ -165,15 +165,17 @@ sudo bash /deploy/apply-runtime.sh
 echo
 sudo bash /deploy/configure-ssh.sh
 
-echo
-echo "=== IMPORTANT MANUAL STEPS STILL REQUIRED ==="
-echo
-echo "1. Run certbot:"
-echo
-echo "   sudo certbot --apache -d $SERVER_DOMAIN"
-echo
-echo "2. Test:"
-echo
-echo "   ssh join@$SERVER_DOMAIN"
-echo
-echo "=== Install complete ==="
+if [[ ! -v container ]]; then
+  echo
+  echo "=== IMPORTANT MANUAL STEPS STILL REQUIRED ==="
+  echo
+  echo "1. Run certbot:"
+  echo
+  echo "   sudo certbot --apache -d $SERVER_DOMAIN"
+  echo
+  echo "2. Test:"
+  echo
+  echo "   ssh join@$SERVER_DOMAIN"
+  echo
+  echo "=== Install complete ==="
+fi
