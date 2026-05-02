@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "CLI"
 authors = []
 dependencies = [
-    "cornell_tilde",
+    "cornell_tilde-infra",
 ]
 
 [build-system]
@@ -12,4 +12,4 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.uv.sources]
-cornell_tilde = { path = "../opt/cornell-tilde/lib", editable = true }
+cornell_tilde-infra = { path = "../opt/cornell-tilde/lib", editable = true }

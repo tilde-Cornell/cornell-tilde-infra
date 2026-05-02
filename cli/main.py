@@ -14,7 +14,7 @@ main = commander(cmd_list = {
         "change_bio": (1, change_bio),
     }
 )
-set_user_bio("minh", "hello world")
+# set_user_bio("minh", "hello world")
 main()
 
 

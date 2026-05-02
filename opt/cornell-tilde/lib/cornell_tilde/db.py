@@ -411,4 +411,5 @@ def set_application_status(
             application_id,
         ))
 
-get_connection()
+init_db()
+print("Database initialized successfully.",DATABASE_PATH)
