@@ -23,4 +23,9 @@ jobs:
             ${{ runner.os }}-podman-
 
       - name: Build the Container image
+        env:
+          JOIN_PASSWORD: ${{ env.JOIN_PASSWORD }}
+          SERVER_DOMAIN: ${{ env.SERVER_DOMAIN }}
+          ADMIN_EMAIL: ${{ env.ADMIN_EMAIL }}
+          container: podman
         run: podman build . --tag tilde-cornell-dev

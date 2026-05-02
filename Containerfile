@@ -22,7 +22,7 @@ COPY ./var /var
 
 RUN chmod +x /deploy/container/setup-container.sh
 
-RUN echo JOIN_PASSWORD=$JOIN_PASSWORD SERVER_DOMAIN=$SERVER_DOMAIN ADMIN_EMAIL=$ADMIN_EMAIL CONTAINER=$container >> /deploy/container/systemd/setup-container.env
+RUN echo JOIN_PASSWORD=$JOIN_PASSWORD SERVER_DOMAIN=$SERVER_DOMAIN ADMIN_EMAIL=$ADMIN_EMAIL container=$container >> /deploy/container/systemd/setup-container.env
 
 RUN ln -s /deploy/container/systemd/setup-in-container.service /etc/systemd/system/setup-in-container.service &&\
     systemctl enable ssh apache2 setup-in-container.service
