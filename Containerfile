@@ -1,6 +1,6 @@
 FROM debian:trixie
 
-ARG ROOT_PASSWORD JOIN_PASSWORD SERVER_DOMAIN ADMIN_EMAIL container="podman"
+ARG JOIN_PASSWORD SERVER_DOMAIN ADMIN_EMAIL container="podman" ROOT_PASSWORD
 
 RUN apt-get update && \
     apt-get install -y systemd\
