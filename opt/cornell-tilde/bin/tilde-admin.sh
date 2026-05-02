@@ -331,8 +331,8 @@ main() {
   check_path_unit cornell-tilde-directory.path
 
   if [[ ! -v container ]]; then
-  check_firewall
-  check_fail2ban
+    check_firewall
+    check_fail2ban
   fi
   
   check_web
