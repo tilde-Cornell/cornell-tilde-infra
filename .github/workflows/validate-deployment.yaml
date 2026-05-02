@@ -28,4 +28,5 @@ jobs:
           SERVER_DOMAIN: ${{ vars.SERVER_DOMAIN }}
           ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
           container: podman
+          ROOT_PASSWORD: ${{ vars.ROOT_PASSWORD }}
         run: podman build . --tag tilde-cornell-dev
