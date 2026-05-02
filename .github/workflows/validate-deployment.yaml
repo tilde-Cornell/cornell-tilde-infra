@@ -23,10 +23,11 @@ jobs:
             ${{ runner.os }}-podman-
 
       - name: Build the Container image
-        env:
-          JOIN_PASSWORD: ${{ vars.JOIN_PASSWORD }}
-          SERVER_DOMAIN: ${{ vars.SERVER_DOMAIN }}
-          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL }}
-          container: podman
-          ROOT_PASSWORD: ${{ vars.ROOT_PASSWORD }}
-        run: podman build . --tag tilde-cornell-dev
+        run: |
+          podman build . \
+            --tag tilde-cornell-dev \
+            --build-arg JOIN_PASSWORD="${{ vars.JOIN_PASSWORD }}" \
+            --build-arg SERVER_DOMAIN="${{ vars.SERVER_DOMAIN }}" \
+            --build-arg ADMIN_EMAIL="${{ vars.ADMIN_EMAIL }}" \
+            --build-arg container="podman"\
+            --build-arg ROOT_PASSWORD="${{ vars.ROOT_PASSWORD }}"
