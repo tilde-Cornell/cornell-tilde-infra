@@ -322,12 +322,19 @@ main() {
 
   check_service ssh
   check_service apache2
-  check_service fail2ban
-  check_service unattended-upgrades
+
+  if [[ ! -v container ]]; then
+    check_service fail2ban
+    check_service unattended-upgrades
+  fi
+
   check_path_unit cornell-tilde-directory.path
 
+  if [[ ! -v container ]]; then
   check_firewall
   check_fail2ban
+  fi
+  
   check_web
   check_database
   check_directory_generation
