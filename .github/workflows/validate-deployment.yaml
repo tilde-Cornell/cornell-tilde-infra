@@ -1,0 +1,26 @@
+name: Validate Deployment Scripts
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Cache Container Layers
+        uses: actions/cache@v5
+        with:
+          path: ~/.local/share/containers/storage
+          key: ${{ runner.os }}-podman-${{ hashFiles('**/Dockerfile') }}
+          restore-keys: |
+            ${{ runner.os }}-podman-${{ hashFiles('**/Dockerfile') }}
+            ${{ runner.os }}-podman-
+
+      - name: Build the Container image
+        run: podman build . --tag tilde-cornell-dev
