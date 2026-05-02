@@ -1,6 +1,14 @@
 services:
   tilde-server:
-    build: .
+    build: 
+      context: .
+      dockerfile: Containerfile
+      args:
+          JOIN_PASSWORD: "#CHANGE_ME#"
+          SERVER_DOMAIN: "#CHANGE_ME#"
+          ADMIN_EMAIL: "#CHANGE_ME#"
+          ROOT_PASSWORD: "#CHANGE_ME#"
+          container: "podman"
     container_name: tilde-server
     volumes:
       - user-data:/home
@@ -10,11 +18,7 @@ services:
       - "2222:22"
       - "8080:80"
     environment:
-      - JOIN_PASSWORD="#CHANGE_ME#"
-      - SERVER_DOMAIN="#CHANGE_ME#"
-      - ADMIN_EMAIL="#CHANGE_ME#"
-      - ROOT_PASSWORD="#CHANGE_ME#"
-      - container=podman
+      - container="podman"
 
 volumes:
   user-data:
