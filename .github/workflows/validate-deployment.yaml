@@ -43,4 +43,4 @@ jobs:
         if: steps.build-podman-image.outcome == 'success'
         run: |
           mkdir -p /tmp/podman-cache
-          podman save --compress --format oci-archive -o /tmp/podman-cache/tilde-cornell-dev.tar tilde-cornell-dev
+          podman save --format oci-archive -o /tmp/podman-cache/tilde-cornell-dev.tar tilde-cornell-dev
