@@ -1,3 +1,6 @@
 [submodule "lib_commander"]
 	path = lib_commander
 	url = https://github.com/legitminh/module.python.lib_commander
+[submodule "opt/cornell-tilde/lib/lib_commander"]
+	path = opt/cornell-tilde/lib/lib_commander
+	url = https://github.com/legitminh/module.python.lib_commander
