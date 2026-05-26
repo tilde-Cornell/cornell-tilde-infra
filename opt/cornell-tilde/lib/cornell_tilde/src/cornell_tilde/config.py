@@ -23,9 +23,15 @@ def load_env_file(path: Path) -> None:
 
         os.environ.setdefault(key, value)
 
-RAW_BASE_DIR = os.getenv("BASE_DIR", "/opt/cornell-tilde")
+from dotenv import load_dotenv
+
+load_dotenv()
+
+RAW_BASE_DIR = os.getenv("BASE_DIR")
+if not RAW_BASE_DIR: raise ValueError
+
 BASE_DIR = Path(RAW_BASE_DIR)
-load_env_file(BASE_DIR / ".env")
+# load_env_file(BASE_DIR / ".env")
 
 BIN_DIR = BASE_DIR / "bin"
 LIB_DIR = BASE_DIR / "lib"
