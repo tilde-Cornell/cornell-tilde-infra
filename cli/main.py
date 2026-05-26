@@ -4,8 +4,9 @@ from cornell_tilde import set_user_bio
 from cornell_tilde import get_current_username
 
 def change_bio(l):
-    print("BIO")
-    set_user_bio(get_current_username(), l[0])
+    username = get_current_username()
+    print(f"setting {username}'s bio")
+    set_user_bio(username, l[0])
 
 def hello(l):  
     print("Hello, world!")
