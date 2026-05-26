@@ -1,0 +1,128 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="icon" type="image/png" href="/favicon.png">
+      <title>tilde@Cornell</title>
+      <link rel="stylesheet" href="/assets/style.css">
+    <meta property="og:title" content="tilde@Cornell">
+    <meta property="og:description" content="A student-run Unix shell server and personal web hosting community for Cornell students.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cornelltilde.com/">
+    <meta property="og:image" content="https://cornelltilde.com/preview.png">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="tilde@Cornell">
+    <meta name="twitter:description" content="Shell access, personal web pages, SSH onboarding, and a student-run Unix community at Cornell.">
+    <meta name="twitter:image" content="https://cornelltilde.com/preview.png">
+    </head>
+    <body>
+    <nav class="top-nav">
+      <a href="/">Home</a>
+      <a href="/directory/">Directory</a>
+      <a href="/ssh/">SSH Setup</a>
+    </nav>
+    <header>
+      <h1>tilde@Cornell</h1>
+      <p class="subtitle">
+        A student-run Unix shell server and personal web hosting community for Cornell students.
+      </p>
+
+    </header>
+
+    <div class="card">
+      <p>
+        tilde@Cornell provides shell access, personal web pages, and a shared space for students
+        interested in computing, systems, research, and building things on the open web.
+      </p>
+
+      <p>
+        Every member receives a Unix account, SSH access, and a personal site at:
+      </p>
+
+      <p>
+        <strong id="site-example-url">https://cornelltilde.com/~username</strong>
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>How to Join</h2>
+
+      <p>
+        To request an account, connect through SSH and complete the onboarding form:
+      </p>
+
+      <div class="terminal">
+        <span id="join-command">ssh join@cornelltilde.com</span><br>
+        Password: GO BIG RED
+      </div>
+      <br>
+      <p>
+        Applications are reviewed manually. Approved users receive personal shell access and web space.
+      </p>
+
+      <p>
+        <strong>Important:</strong> the application requires your
+        <strong>SSH public key</strong> (not your private key).
+        Your account cannot be approved without it.
+      </p>
+
+      <p>
+        Before applying, make sure you know how to find your existing SSH key
+        or generate a new one.
+      </p>
+
+      <p>
+        <a href="/ssh/">View SSH Public Key Setup Instructions</a>
+      </p>
+    </div>
+    <div class="card">
+  <h2>First Time Connecting?</h2>
+
+  <p>
+    Before entering the join password, verify the tilde@Cornell SSH server fingerprint:
+  </p>
+
+  <div class="terminal">
+    SHA256:HkZtm9ggJ4K3CKpGZvdSdNo6JA/LioRKd8nteKxl24U
+  </div>
+
+  <p>
+    If SSH shows a different fingerprint, your network may be redirecting
+    <span id="site-domain-warning">cornelltilde.com</span>. This can happen on school or managed networks.
+  </p>
+
+  <p>
+    Full SSH setup instructions:
+    <a href="/ssh/">/ssh/</a>
+  </p>
+</div>
+
+    <div class="card">
+      <h2>Directory</h2>
+
+      <p>
+        View member profiles and personal pages in the user directory:
+      </p>
+
+      <p>
+        <a href="/directory/">Visit the tilde@Cornell Directory</a>
+      </p>
+    </div>
+
+    <footer>
+      tilde@Cornell is a student-run project and is not an official Cornell University service.
+    </footer>
+
+    <script>
+      const currentOrigin = window.location.origin;
+      const currentHostname = window.location.hostname;
+
+      document.getElementById("site-example-url").textContent = `${currentOrigin}/~username`;
+      document.getElementById("join-command").textContent = `ssh join@${currentHostname}`;
+      document.getElementById("site-domain-warning").textContent = currentHostname;
+    </script>
+
+    </body>
+    </html>

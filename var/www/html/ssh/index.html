@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <title>SSH Public Key Setup | tilde@Cornell</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<nav class="top-nav">
+  <a href="/">Home</a>
+  <a href="/directory/">Directory</a>
+  <a href="/ssh/">SSH Setup</a>
+</nav>
+
+<header>
+  <h1>SSH Public Key Setup</h1>
+  <p class="subtitle">
+    tilde@Cornell requires your SSH public key for account approval and secure login.
+  </p>
+</header>
+
+<div class="card">
+  <h2>Verify the tilde@Cornell SSH Server</h2>
+
+  <p>
+    Before entering the join password, make sure SSH shows the correct
+    tilde@Cornell server fingerprint.
+  </p>
+
+  <p>
+    The correct ED25519 host key fingerprint is:
+  </p>
+
+  <div class="terminal">
+    SHA256:HkZtm9ggJ4K3CKpGZvdSdNo6JA/LioRKd8nteKxl24U
+</div>
+  <p>
+    If SSH shows a different fingerprint, do not continue. Your network may be
+    redirecting <span id="ssh-domain-warning">cornelltilde.com</span>, especially on school or managed networks.
+  </p>
+
+  <p>
+    If you previously accepted a wrong key, remove it and reconnect:
+  </p>
+
+  <div class="terminal">
+<span id="remove-known-host">ssh-keygen -R cornelltilde.com</span>
+<br>
+<span id="join-command">ssh join@cornelltilde.com</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>What You Need</h2>
+
+  <p>
+    Your application requires your <strong>SSH public key</strong>
+    (not your private key).
+    This allows secure passwordless login after approval.
+  </p>
+
+  <p>
+    Your account cannot be approved without it.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Check If You Already Have One</h2>
+
+  <p>
+    Most students already have one. First, check by running:
+  </p>
+
+  <div class="terminal">
+ls ~/.ssh
+  </div>
+
+  <p>
+    If you see files like <strong>id_ed25519.pub</strong> or
+    <strong>id_rsa.pub</strong>, you already have a public key.
+  </p>
+</div>
+
+<div class="card">
+  <h2>View and Copy Your Public Key</h2>
+
+  <p>
+    To view and copy your key:
+  </p>
+
+  <div class="terminal">
+cat ~/.ssh/id_ed25519.pub
+  </div>
+
+  <p>
+    If you only have <strong>id_rsa.pub</strong>, that works too.
+  </p>
+
+  <p>
+    Copy the full line and paste it into the tilde@Cornell application form.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Create a New SSH Key</h2>
+
+  <p>
+    If you do not already have one, create a modern SSH key with:
+  </p>
+
+  <div class="terminal">
+ssh-keygen -t ed25519 -C "your_netid@cornell.edu"
+  </div>
+
+  <p>
+    Then:
+  </p>
+
+  <ul>
+    <li>Press Enter to accept the default file location</li>
+    <li>Choose a passphrase if you would like one (recommended)</li>
+    <li>Your public key will be saved as <strong>~/.ssh/id_ed25519.pub</strong></li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>Helpful Documentation</h2>
+
+  <p>
+    Additional guides:
+  </p>
+
+  <p>
+    <a href="https://docs.digitalocean.com/products/droplets/how-to/add-ssh-keys/create-with-openssh/" target="_blank">
+      DigitalOcean: Create SSH Keys with OpenSSH
+    </a>
+    <br>
+    <a href="https://docs.aws.amazon.com/transfer/latest/userguide/macOS-linux-unix-ssh.html" target="_blank">
+      AWS: Creating SSH Keys on macOS, Linux, and Unix
+    </a>
+  </p>
+</div>
+
+<div class="card">
+  <h2>Apply</h2>
+
+  <p>
+    Once your SSH public key is ready, return to the join server:
+  </p>
+
+  <div class="terminal">
+<span id="apply-join-command">ssh join@cornelltilde.com</span>
+Password: GO BIG RED
+  </div>
+</div>
+
+<footer>
+  tilde@Cornell is a student-run project and is not an official Cornell University service.
+</footer>
+
+<script>
+  const currentHostname = window.location.hostname;
+
+  document.getElementById("ssh-domain-warning").textContent = currentHostname;
+  document.getElementById("remove-known-host").textContent = `ssh-keygen -R ${currentHostname}`;
+  document.getElementById("join-command").textContent = `ssh join@${currentHostname}`;
+  document.getElementById("apply-join-command").textContent = `ssh join@${currentHostname}`;
+</script>
+
+</body>
+</html>
