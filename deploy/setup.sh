@@ -9,52 +9,54 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-read -rsp "Password for join user: " JOIN_PASSWORD
-echo
-read -rp "Server domain (example: cornelltilde.com or dev.cornelltilde.com): " SERVER_DOMAIN
-echo
-read -rp "Admin contact email (example: admin@cornelltilde.com): " ADMIN_EMAIL
-echo
+if [[ ! -v container ]]; then
+  read -rsp "Password for join user: " JOIN_PASSWORD
+  echo
+  read -rp "Server domain (example: cornelltilde.com or dev.cornelltilde.com): " SERVER_DOMAIN
+  echo
+  read -rp "Admin contact email (example: admin@cornelltilde.com): " ADMIN_EMAIL
+  echo
 
-echo "Server domain: $SERVER_DOMAIN"
-echo "Admin contact email: $ADMIN_EMAIL"
-echo
+  echo "Server domain: $SERVER_DOMAIN"
+  echo "Admin contact email: $ADMIN_EMAIL"
+  echo
 
-echo "=== Installing packages ==="
+  echo "=== Installing packages ==="
 
-sudo apt update
-sudo apt upgrade -y
+  sudo apt-get update
+  sudo apt-get upgrade -y
 
-sudo apt install -y \
-  sudo \
-  curl \
-  tree \
-  rsync \
-  acl \
-  sqlite3 \
-  python3 \
-  apache2 \
-  openssh-server \
-  fail2ban \
-  ufw \
-  certbot \
-  python3-certbot-apache \
-  unattended-upgrades
+  sudo apt-get install -y \
+    sudo \
+    curl \
+    tree \
+    rsync \
+    acl \
+    sqlite3 \
+    python3 \
+    apache2 \
+    openssh-server \
+    fail2ban \
+    ufw \
+    certbot \
+    python3-certbot-apache \
+    unattended-upgrades
 
-echo
-echo "=== Enabling services ==="
+  echo
+  echo "=== Enabling services ==="
 
-sudo systemctl enable ssh apache2 fail2ban ufw unattended-upgrades
-sudo systemctl start ssh apache2 fail2ban ufw
+  sudo systemctl enable ssh apache2 fail2ban ufw unattended-upgrades
+  sudo systemctl start ssh apache2 fail2ban ufw
 
-echo
-echo "=== Firewall ==="
+  echo
+  echo "=== Firewall ==="
 
-sudo ufw allow OpenSSH
-sudo ufw allow 22/tcp
-sudo ufw allow 80
-sudo ufw allow 443
-sudo ufw --force enable
+  sudo ufw allow OpenSSH
+  sudo ufw allow 22/tcp
+  sudo ufw allow 80
+  sudo ufw allow 443
+  sudo ufw --force enable
+fi
 
 echo
 echo "=== Creating directories ==="
@@ -163,15 +165,17 @@ sudo bash /deploy/apply-runtime.sh
 echo
 sudo bash /deploy/configure-ssh.sh
 
-echo
-echo "=== IMPORTANT MANUAL STEPS STILL REQUIRED ==="
-echo
-echo "1. Run certbot:"
-echo
-echo "   sudo certbot --apache -d $SERVER_DOMAIN"
-echo
-echo "2. Test:"
-echo
-echo "   ssh join@$SERVER_DOMAIN"
-echo
-echo "=== Install complete ==="
+if [[ ! -v container ]]; then
+  echo
+  echo "=== IMPORTANT MANUAL STEPS STILL REQUIRED ==="
+  echo
+  echo "1. Run certbot:"
+  echo
+  echo "   sudo certbot --apache -d $SERVER_DOMAIN"
+  echo
+  echo "2. Test:"
+  echo
+  echo "   ssh join@$SERVER_DOMAIN"
+  echo
+  echo "=== Install complete ==="
+fi

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run setup script at first boot
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/deploy/container/setup-container.sh
+ExecStartPost=/usr/bin/touch /deploy/container/systemd/done
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
